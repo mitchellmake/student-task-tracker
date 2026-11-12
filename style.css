@@ -1,46 +1,49 @@
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
     font-family: Arial, sans-serif;
-    background: #f4f6fb;
-    color: #252b42;
+    background: #f4f5fb;
+    color: #252744;
+    min-height: 100vh;
 }
 
 header {
     background: #5146d8;
     color: white;
-    padding: 35px 20px;
     text-align: center;
+    padding: 35px 20px;
 }
 
 header h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 36px;
+    margin-bottom: 10px;
 }
 
 header p {
+    font-size: 16px;
     opacity: 0.9;
 }
 
 main {
-    max-width: 850px;
-    margin: 40px auto;
-    padding: 20px;
+    max-width: 1000px;
+    margin: 45px auto;
+    padding: 0 20px;
 }
 
 .dashboard {
     background: white;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    padding: 32px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(30, 30, 70, 0.07);
 }
 
 .dashboard h2 {
+    font-size: 26px;
     margin-bottom: 10px;
 }
 
@@ -50,18 +53,19 @@ main {
 }
 
 .task-input {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 2fr 1.5fr auto;
+    gap: 12px;
     margin-bottom: 30px;
 }
 
 input {
-    flex: 1;
-    min-width: 130px;
-    padding: 13px;
+    width: 100%;
+    padding: 15px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 10px;
+    font-size: 14px;
+    min-width: 0;
 }
 
 button {
@@ -69,67 +73,51 @@ button {
     color: white;
     border: none;
     padding: 13px 20px;
-    border-radius: 8px;
+    border-radius: 9px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 button:hover {
-    background: #3930ad;
+    opacity: 0.88;
 }
 
 .dashboard h3 {
-    margin-bottom: 15px;
+    font-size: 20px;
+    margin-bottom: 20px;
 }
-
-#taskList {
-    list-style: none;
-}
-
-#taskList li {
-    background: #f4f5fc;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-
-#progress {
-    margin-top: 20px;
-    font-weight: bold;
-    color: #5146d8;
-}
-
-/* Version 2 dashboard */
 
 .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 16px;
     margin: 25px 0;
 }
 
 .stat-card {
-    background: #f4f3ff;
-    padding: 18px;
-    border-radius: 12px;
+    background: #f3f1ff;
+    padding: 22px;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .stat-card span {
     color: #777;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .stat-card strong {
     color: #5146d8;
-    font-size: 25px;
+    font-size: 30px;
 }
 
 .filters {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 20px 0;
     flex-wrap: wrap;
 }
 
@@ -143,18 +131,30 @@ button:hover {
     color: white;
 }
 
+#taskList {
+    list-style: none;
+}
+
+#taskList li {
+    background: #fafaff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
 .task-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
 .task-details {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 8px;
 }
 
 .task-details small {
@@ -176,28 +176,39 @@ button:hover {
     font-weight: bold;
 }
 
-@media (max-width: 600px) {
+#progress {
+    color: #5146d8;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+@media (max-width: 650px) {
     main {
-        margin: 15px auto;
+        margin: 20px auto;
+        padding: 0 12px;
     }
 
     .dashboard {
         padding: 20px;
     }
 
-    .task-input {
-        flex-direction: column;
-    }
-
-    input, .task-input button {
-        width: 100%;
-    }
-
     .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .task-input {
         grid-template-columns: 1fr;
     }
 
     .task-item {
         align-items: flex-start;
+    }
+
+    .task-actions {
+        width: 100%;
+    }
+
+    header h1 {
+        font-size: 29px;
     }
 }
