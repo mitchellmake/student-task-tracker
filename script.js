@@ -29,7 +29,7 @@ stats.innerHTML = `
     </div>
 `;
 
-dashboard.insertBefore(stats, taskList.parentElement);
+dashboard.insertBefore(stats, taskList);
 
 const filters = document.createElement("div");
 filters.className = "filters";
