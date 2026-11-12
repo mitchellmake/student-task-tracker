@@ -4,37 +4,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusKit | Student Planner</title>
+    <meta name="theme-color" content="#315D87">
+    <meta name="description" content="CampusKit - Your personal student planner.">
+    <title>CampusKit | Your Study Space</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>CampusKit</h1>
-        <p>Your academic life, organised.</p>
-    </header>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="#" class="brand">
+            <span class="brand-icon">✦</span>
+            <span>CampusKit</span>
+        </a>
+        <span class="header-label">YOUR STUDY SPACE</span>
+    </div>
+</header>
 
-    <main>
-        <section class="dashboard">
-            <h2>My Assignments</h2>
-            <p>Keep track of everything you need to complete.</p>
+<main class="container">
 
-            <div class="task-input">
-                <input type="text" id="taskInput"
-                    placeholder="Enter an assignment">
+    <section class="welcome">
+        <div>
+            <span class="eyebrow">WELCOME TO YOUR CAMPUS</span>
+            <h1>Make today count.</h1>
+            <p>A little progress every day adds up. Let's make this a good one.</p>
+        </div>
+        <div class="welcome-icon">📚</div>
+    </section>
 
-                <input type="date" id="dueDate">
+    <section class="stats" aria-label="Assignment statistics">
+        <article class="stat-card">
+            <span>Total assignments</span>
+            <strong id="totalTasks">0</strong>
+            <small>Everything on your list</small>
+        </article>
+        <article class="stat-card">
+            <span>Pending</span>
+            <strong id="pendingTasks">0</strong>
+            <small>Still to work on</small>
+        </article>
+        <article class="stat-card">
+            <span>Completed</span>
+            <strong id="completedTasks">0</strong>
+            <small>Look at your progress!</small>
+        </article>
+    </section>
 
-                <button id="addTask">Add Task</button>
+    <section class="panel assignments-panel" id="assignments">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">STAY ON TRACK</span>
+                <h2>My assignments</h2>
+                <p>Keep all your academic tasks in one place.</p>
+            </div>
+            <span class="heading-icon">✎</span>
+        </div>
+
+        <form id="taskForm" class="task-input">
+            <label class="sr-only" for="taskInput">Assignment name</label>
+            <input id="taskInput" type="text"
+                   placeholder="What do you need to work on?"
+                   maxlength="100" required>
+
+            <label class="sr-only" for="dueDate">Due date</label>
+            <input id="dueDate" type="date">
+
+            <button type="submit" class="primary-button">+ Add task</button>
+        </form>
+
+        <div class="task-toolbar">
+            <h3>Your task list</h3>
+            <div class="filters" aria-label="Filter assignments">
+                <button type="button" data-filter="all" class="active">All</button>
+                <button type="button" data-filter="pending">Pending</button>
+                <button type="button" data-filter="completed">Completed</button>
+            </div>
+        </div>
+
+        <ul id="taskList" class="task-list"></ul>
+        <p id="progress" class="progress-text" aria-live="polite">
+            Completed: 0 / 0
+        </p>
+    </section>
+
+    <section class="two-column">
+
+        <section class="panel" id="calendar">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">PLAN AHEAD</span>
+                    <h2>Deadline calendar</h2>
+                    <p>See when your assignments are due.</p>
+                </div>
+                <span class="heading-icon">▦</span>
             </div>
 
-            <h3>My Tasks</h3>
-            <ul id="taskList"></ul>
+            <div class="calendar-controls">
+                <button type="button" id="prevMonth" aria-label="Previous month">←</button>
+                <h3 id="monthLabel"></h3>
+                <button type="button" id="nextMonth" aria-label="Next month">→</button>
+            </div>
 
-            <p id="progress">Completed: 0</p>
+            <div class="calendar-grid" id="calendarGrid"
+                 aria-label="Monthly deadline calendar"></div>
+
+            <div class="calendar-legend">
+                <span class="legend-dot"></span> Assignment deadline
+            </div>
         </section>
-    </main>
 
-    <script src="script.js"></script>
+        <section class="panel timer-panel" id="timer">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">FOCUS TIME</span>
+                    <h2>Study timer</h2>
+                    <p>One task. One focus session.</p>
+                </div>
+                <span class="heading-icon">◷</span>
+            </div>
+
+            <div class="timer-circle">
+                <div>
+                    <strong id="timerDisplay">25:00</strong>
+                    <span id="timerStatus">READY TO FOCUS</span>
+                </div>
+            </div>
+
+            <div class="timer-controls">
+                <button type="button" id="startTimer" class="primary-button">Start</button>
+                <button type="button" id="resetTimer" class="secondary-button">Reset</button>
+            </div>
+            <p class="timer-note">Try 25 minutes of focus followed by a short break.</p>
+        </section>
+
+    </section>
+
+    <section class="two-column">
+
+        <section class="panel quote-panel">
+            <span class="eyebrow">A LITTLE ENCOURAGEMENT</span>
+            <h2>Today's study reminder</h2>
+            <blockquote id="dailyQuote"></blockquote>
+            <p class="quote-credit">A reminder for your journey.</p>
+        </section>
+
+        <section class="panel notes-panel" id="notes">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">YOUR PERSONAL SPACE</span>
+                    <h2>Study notes</h2>
+                    <p>Write down ideas, reminders and thoughts.</p>
+                </div>
+                <span class="heading-icon">✎</span>
+            </div>
+
+            <label class="sr-only" for="studyNotes">Your personal study notes</label>
+            <textarea id="studyNotes"
+                placeholder="Start writing your notes here..."
+                rows="7" maxlength="10000"></textarea>
+            <p id="notesStatus" class="notes-status" aria-live="polite">
+                Notes are saved on this device.
+            </p>
+        </section>
+
+    </section>
+
+    <footer>
+        <strong>CampusKit</strong>
+        <p>Study with purpose. Grow at your own pace.</p>
+    </footer>
+
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
