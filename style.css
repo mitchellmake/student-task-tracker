@@ -1,5 +1,104 @@
 
-/* CampusKit Version 2 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6fb;
+    color: #252b42;
+}
+
+header {
+    background: #5146d8;
+    color: white;
+    padding: 35px 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+header p {
+    opacity: 0.9;
+}
+
+main {
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.dashboard {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.dashboard h2 {
+    margin-bottom: 10px;
+}
+
+.dashboard > p {
+    color: #777;
+    margin-bottom: 25px;
+}
+
+.task-input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+input {
+    flex: 1;
+    min-width: 130px;
+    padding: 13px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+button {
+    background: #5146d8;
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #3930ad;
+}
+
+.dashboard h3 {
+    margin-bottom: 15px;
+}
+
+#taskList {
+    list-style: none;
+}
+
+#taskList li {
+    background: #f4f5fc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+#progress {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #5146d8;
+}
+
+/* Version 2 dashboard */
 
 .stats {
     display: grid;
@@ -78,6 +177,22 @@
 }
 
 @media (max-width: 600px) {
+    main {
+        margin: 15px auto;
+    }
+
+    .dashboard {
+        padding: 20px;
+    }
+
+    .task-input {
+        flex-direction: column;
+    }
+
+    input, .task-input button {
+        width: 100%;
+    }
+
     .stats {
         grid-template-columns: 1fr;
     }
