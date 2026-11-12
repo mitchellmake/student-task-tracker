@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusKit | Student Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>CampusKit</h1>
+        <p>Your academic life, organised.</p>
+    </header>
+
+    <main>
+        <section class="dashboard">
+            <h2>My Assignments</h2>
+            <p>Keep track of everything you need to complete.</p>
+
+            <div class="task-input">
+                <input type="text" id="taskInput"
+                    placeholder="Enter an assignment">
+
+                <input type="date" id="dueDate">
+
+                <button id="addTask">Add Task</button>
+            </div>
+
+            <h3>My Tasks</h3>
+            <ul id="taskList"></ul>
+
+            <p id="progress">Completed: 0</p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
