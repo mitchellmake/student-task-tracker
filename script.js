@@ -1,50 +1,48 @@
 
+// CAMPUSKIT - MAIN APPLICATION
+
 const taskInput = document.getElementById("taskInput");
 const dueDate = document.getElementById("dueDate");
-const addTask = document.getElementById("addTask");
+const taskForm = document.getElementById("taskForm");
 const taskList = document.getElementById("taskList");
 const progress = document.getElementById("progress");
 
-let tasks = JSON.parse(localStorage.getItem("campuskitTasks") || "[]");
+// Keep existing assignment data
+let tasks = [];
+
+try {
+    const savedTasks = JSON.parse(
+        localStorage.getItem("campuskitTasks") || "[]"
+    );
+    tasks = Array.isArray(savedTasks) ? savedTasks : [];
+} catch {
+    tasks = [];
+}
+
 let currentFilter = "all";
 
-// Create dashboard statistics
-const dashboard = document.querySelector(".dashboard");
-
-const stats = document.createElement("div");
-stats.className = "stats";
-
-stats.innerHTML = `
-    <div class="stat-card">
-        <span>Total tasks</span>
-        <strong id="totalTasks">0</strong>
-    </div>
-    <div class="stat-card">
-        <span>Pending</span>
-        <strong id="pendingTasks">0</strong>
-    </div>
-    <div class="stat-card">
-        <span>Completed</span>
-        <strong id="completedTasks">0</strong>
-    </div>
-`;
-
-dashboard.insertBefore(stats, taskList);
-
-const filters = document.createElement("div");
-filters.className = "filters";
-
-filters.innerHTML = `
-    <button data-filter="all">All</button>
-    <button data-filter="pending">Pending</button>
-    <button data-filter="completed">Completed</button>
-`;
-
-taskList.parentElement.insertBefore(filters, taskList);
+// -----------------------------
+// ASSIGNMENT STORAGE
+// -----------------------------
 
 function saveTasks() {
     localStorage.setItem("campuskitTasks", JSON.stringify(tasks));
 }
+
+function todayString() {
+    const date = new Date();
+    return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+    ].join("-");
+}
+
+dueDate.min = todayString();
+
+// -----------------------------
+// DASHBOARD STATISTICS
+// -----------------------------
 
 function updateDashboard() {
     const completed = tasks.filter(task => task.done).length;
@@ -57,15 +55,12 @@ function updateDashboard() {
     progress.textContent = `Completed: ${completed} / ${tasks.length}`;
 }
 
-function displayTasks() {
-    taskList.innerHTML = "";
+// -----------------------------
+// DISPLAY ASSIGNMENTS
+// -----------------------------
 
-    const today = new Date();
-    const todayString = [
-        today.getFullYear(),
-        String(today.getMonth() + 1).padStart(2, "0"),
-        String(today.getDate()).padStart(2, "0")
-    ].join("-");
+function displayTasks() {
+    taskList.replaceChildren();
 
     const filteredTasks = tasks.filter(task => {
         if (currentFilter === "pending") return !task.done;
@@ -75,13 +70,16 @@ function displayTasks() {
 
     if (filteredTasks.length === 0) {
         const empty = document.createElement("li");
-        empty.textContent = "No assignments here yet.";
+        empty.className = "empty-state";
+        empty.textContent = "No assignments here yet. Add your first task!";
         taskList.appendChild(empty);
     }
 
     filteredTasks.forEach(task => {
-        const li = document.createElement("li");
-        li.className = "task-item";
+        const item = document.createElement("li");
+        item.className = "task-item";
+
+        if (task.done) item.classList.add("is-done");
 
         const details = document.createElement("div");
         details.className = "task-details";
@@ -96,7 +94,7 @@ function displayTasks() {
 
         details.append(name, date);
 
-        if (task.date && !task.done && task.date < todayString) {
+        if (task.date && !task.done && task.date < todayString()) {
             const overdue = document.createElement("span");
             overdue.className = "overdue";
             overdue.textContent = "Overdue";
@@ -107,15 +105,18 @@ function displayTasks() {
         actions.className = "task-actions";
 
         const completeButton = document.createElement("button");
-        completeButton.textContent = task.done ? "Undo" : "Complete";
+        completeButton.type = "button";
+        completeButton.textContent = task.done ? "Undo" : "Mark done";
 
         completeButton.addEventListener("click", () => {
             task.done = !task.done;
             saveTasks();
             displayTasks();
+            renderCalendar();
         });
 
         const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
         deleteButton.textContent = "Delete";
         deleteButton.className = "delete-button";
 
@@ -124,12 +125,13 @@ function displayTasks() {
                 tasks = tasks.filter(item => item.id !== task.id);
                 saveTasks();
                 displayTasks();
+                renderCalendar();
             }
         });
 
         actions.append(completeButton, deleteButton);
-        li.append(details, actions);
-        taskList.appendChild(li);
+        item.append(details, actions);
+        taskList.appendChild(item);
     });
 
     updateDashboard();
@@ -142,41 +144,47 @@ function displayTasks() {
     });
 }
 
-addTask.addEventListener("click", () => {
+// -----------------------------
+// ADD ASSIGNMENTS
+// -----------------------------
+
+taskForm.addEventListener("submit", event => {
+    event.preventDefault();
+
     const name = taskInput.value.trim();
     const date = dueDate.value;
 
     if (!name) {
-        alert("Please enter an assignment!");
+        alert("Please enter an assignment name.");
         return;
     }
 
-    if (date && date < (() => {
-        const d = new Date();
-        return [
-            d.getFullYear(),
-            String(d.getMonth() + 1).padStart(2, "0"),
-            String(d.getDate()).padStart(2, "0")
-        ].join("-");
-    })()) {
-        alert("Please select today or a future due date.");
+    if (date && date < todayString()) {
+        alert("Please choose today or a future deadline.");
         return;
     }
 
     tasks.push({
-        id: Date.now(),
+        id: Date.now() + Math.random(),
         name: name,
         date: date,
         done: false
     });
 
     saveTasks();
+
     taskInput.value = "";
     dueDate.value = "";
+
     displayTasks();
+    renderCalendar();
 });
 
-filters.addEventListener("click", event => {
+// -----------------------------
+// ASSIGNMENT FILTERS
+// -----------------------------
+
+document.querySelector(".filters").addEventListener("click", event => {
     const button = event.target.closest("button[data-filter]");
 
     if (!button) return;
@@ -185,4 +193,207 @@ filters.addEventListener("click", event => {
     displayTasks();
 });
 
+// -----------------------------
+// DEADLINE CALENDAR
+// -----------------------------
+
+let calendarDate = new Date();
+calendarDate = new Date(
+    calendarDate.getFullYear(),
+    calendarDate.getMonth(),
+    1
+);
+
+function renderCalendar() {
+    const grid = document.getElementById("calendarGrid");
+    const monthLabel = document.getElementById("monthLabel");
+
+    grid.replaceChildren();
+
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+
+    monthLabel.textContent = calendarDate.toLocaleDateString(
+        "en",
+        { month: "long", year: "numeric" }
+    );
+
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    weekdays.forEach(day => {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day weekday";
+        cell.textContent = day;
+        grid.appendChild(cell);
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement("div");
+        grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.textContent = day;
+
+        const dateString = [
+            year,
+            String(month + 1).padStart(2, "0"),
+            String(day).padStart(2, "0")
+        ].join("-");
+
+        if (dateString === todayString()) {
+            cell.classList.add("today");
+            cell.setAttribute("aria-label", `Today, ${day}`);
+        }
+
+        const hasDeadline = tasks.some(
+            task => task.date === dateString && !task.done
+        );
+
+        if (hasDeadline) {
+            cell.classList.add("has-deadline");
+            cell.setAttribute(
+                "aria-label",
+                `${day}, assignment deadline`
+            );
+            cell.title = "Assignment deadline";
+        }
+
+        grid.appendChild(cell);
+    }
+}
+
+document.getElementById("prevMonth").addEventListener("click", () => {
+    calendarDate.setMonth(calendarDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById("nextMonth").addEventListener("click", () => {
+    calendarDate.setMonth(calendarDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// -----------------------------
+// DAILY STUDY QUOTES
+// -----------------------------
+
+const quotes = [
+    "Great things are done by a series of small things brought together.",
+    "Your future is created by what you do today.",
+    "Believe in your ability to learn something new.",
+    "Progress, not perfection.",
+    "Every expert was once a beginner.",
+    "Small steps every day lead to big achievements.",
+    "Your effort today is an investment in tomorrow."
+];
+
+function displayDailyQuote() {
+    const dayNumber = Math.floor(
+        new Date().getTime() / 86400000
+    );
+
+    const quoteIndex = dayNumber % quotes.length;
+
+    document.getElementById("dailyQuote").textContent =
+        '"' + quotes[quoteIndex] + '"';
+}
+
+// -----------------------------
+// POMODORO STUDY TIMER
+// -----------------------------
+
+let remainingSeconds = 25 * 60;
+let timerInterval = null;
+
+const timerDisplay = document.getElementById("timerDisplay");
+const timerStatus = document.getElementById("timerStatus");
+const startTimer = document.getElementById("startTimer");
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    timerDisplay.textContent =
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+}
+
+startTimer.addEventListener("click", () => {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startTimer.textContent = "Resume";
+        timerStatus.textContent = "PAUSED";
+        return;
+    }
+
+    if (remainingSeconds <= 0) {
+        return;
+    }
+
+    startTimer.textContent = "Pause";
+    timerStatus.textContent = "FOCUSING";
+
+    timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimerDisplay();
+
+        if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+
+            startTimer.textContent = "Start again";
+            timerStatus.textContent = "SESSION COMPLETE";
+
+            if ("Notification" in window &&
+                Notification.permission === "granted") {
+                new Notification("CampusKit", {
+                    body: "Your study session is complete!"
+                });
+            }
+        }
+    }, 1000);
+});
+
+document.getElementById("resetTimer").addEventListener("click", () => {
+    clearInterval(timerInterval);
+    timerInterval = null;
+
+    remainingSeconds = 25 * 60;
+    updateTimerDisplay();
+
+    startTimer.textContent = "Start";
+    timerStatus.textContent = "READY TO FOCUS";
+});
+
+// -----------------------------
+// PERSONAL STUDY NOTES
+// -----------------------------
+
+const studyNotes = document.getElementById("studyNotes");
+const notesStatus = document.getElementById("notesStatus");
+
+studyNotes.value = localStorage.getItem("campuskitNotes") || "";
+
+studyNotes.addEventListener("input", () => {
+    try {
+        localStorage.setItem("campuskitNotes", studyNotes.value);
+        notesStatus.textContent = "Saved on this device.";
+    } catch {
+        notesStatus.textContent = "Unable to save. Check device storage.";
+    }
+});
+
+// -----------------------------
+// INITIALISE CAMPUSKIT
+// -----------------------------
+
 displayTasks();
+renderCalendar();
+displayDailyQuote();
+updateTimerDisplay();
