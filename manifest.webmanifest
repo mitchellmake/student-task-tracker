@@ -1,0 +1,14 @@
+{
+  "id": "./",
+  "name": "CampusKit - Your Study Space",
+  "short_name": "CampusKit",
+  "description": "Your personal student planner for assignments, deadlines and study habits.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f7fb",
+  "theme_color": "#315d87",
+  "icons": [
+    { "src": "campuskit-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
