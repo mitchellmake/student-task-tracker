@@ -25,8 +25,15 @@ function showSignedOut() {
 function showSignedIn(user) {
     authPanel.hidden = true;
     appContent.hidden = false;
-    accountLabel.textContent =
-        user.user_metadata?.full_name || user.email || "Student";
+    const displayName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "Student";
+    const firstName = displayName.trim().split(/\\s+/)[0];
+    accountLabel.textContent = displayName;
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    if (welcomeGreeting) welcomeGreeting.textContent = `Hello, ${firstName}`;
     logoutButton.hidden = false;
 }
 
