@@ -100,7 +100,21 @@ function renderCourses(){const list=$("courseList");if(!list||!currentUserId)ret
 function refreshNoteCourseOptions(){if(!noteCourse||!currentUserId)return;const previous=activeNoteCourse;noteCourse.replaceChildren();getCourses().forEach(course=>noteCourse.append(new Option(course,course)));noteCourse.value=getCourses().includes(previous)?previous:"General";loadCourseNotes();}
 $("courseForm").addEventListener("submit",e=>{e.preventDefault();const name=$("courseName").value.trim();if(!name)return;if(getCourses().some(x=>x.toLowerCase()===name.toLowerCase())){alert("That course is already on your list.");return;}saveCourses([...getCourses(),name]);$("courseName").value="";renderCourses();});
 function migrateLegacyNotes(){if(!currentUserId)return;const legacy=localStorage.getItem("campuskitNotes"),generalKey=notesStorageKey("General");if(legacy!==null&&localStorage.getItem(generalKey)===null){localStorage.setItem(generalKey,legacy);localStorage.removeItem("campuskitNotes");}}
-function exportCampusKitBackup(){if(!currentUserId||!assignmentsReady){$("backupStatus").textContent="Please wait until your assignments have loaded.";return;}const local={};["exams","focusRecords"].forEach(k=>local[k]=readLocal(k));local.courses=getCourses();local.notes={};getCourses().forEach(course=>local.notes[course]=localStorage.getItem(notesStorageKey(course))||"");const backup={app:"CampusKit",formatVersion:1,exportedAt:new Date().toISOString(),assignments:tasks.map(t=>({...t})),localData:local,preferences:{theme:localStorage.getItem("campuskitTheme")||"light"}};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="campuskit-backup-"+todayString()+".json";document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);$("backupStatus").textContent="Backup downloaded. Keep the file somewhere safe.";}
+function exportCampusKitBackup(){
+ if(!currentUserId||!assignmentsReady){$("backupStatus").textContent="Please wait until your assignments have loaded.";return;}
+ const rows=[["Record type","Name","Course","Due date","Completed","Priority","Repeat","Notes","Date","Minutes","Preference"]];
+ const clean=v=>v==null?"":String(v).replace(/\r?\n/g," ");
+ tasks.forEach(t=>rows.push(["Assignment",clean(t.name),clean(t.course),clean(t.date),t.done?"Yes":"No",clean(t.priority),clean(t.recurrence)]));
+ getCourses().forEach(course=>rows.push(["Course","",clean(course)]));
+ getCourses().forEach(course=>{const note=localStorage.getItem(notesStorageKey(course))||"";if(note)rows.push(["Study note","",clean(course),"","","","",clean(note)]);});
+ readLocal("exams").forEach(x=>rows.push(["Exam",clean(x.name),"",clean(x.date)]));
+ readLocal("focusRecords").forEach(x=>rows.push(["Focus session","",clean(x.course),"","","","", "",clean(x.date),clean(x.minutes)]));
+ rows.push(["Preference","","","","","","","","","","Theme: "+clean(localStorage.getItem("campuskitTheme")||"light")]);
+ const csv=rows.map(row=>row.map(value=>{const s=clean(value);return '"'+s.replace(/"/g,'""')+'"';}).join(",")).join("\r\n");
+ const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="campuskit-backup-"+todayString()+".csv";document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+ $("backupStatus").textContent="CSV backup downloaded. Open it with Excel or Google Sheets.";
+}
 $("exportBackup").addEventListener("click",exportCampusKitBackup);
 
 function renderExams(){const list=$("examList");if(!list)return;list.replaceChildren();const exams=readLocal("exams").sort((a,b)=>a.date.localeCompare(b.date));if(!exams.length){const li=document.createElement("li");li.textContent="No exams added yet.";list.append(li);return;}exams.forEach((x,i)=>{const li=document.createElement("li"),name=document.createElement("span"),count=document.createElement("small"),del=document.createElement("button");const days=Math.ceil((new Date(x.date+"T00:00:00")-new Date(todayString()+"T00:00:00"))/86400000);name.textContent=x.name;count.textContent=days<0?"Date passed":days===0?"Today":days+" days left";del.className="mini-button";del.textContent="Remove";del.addEventListener("click",()=>{const a=readLocal("exams");a.splice(i,1);writeLocal("exams",a);renderExams();});li.append(name,count,del);list.append(li);});}
