@@ -16,15 +16,21 @@ function showMessage(message, isError = false) {
 }
 
 function showSignedOut() {
+    // Explicit display control prevents CSS layout rules from showing both views.
     authPanel.hidden = false;
+    authPanel.style.display = "";
     appContent.hidden = true;
+    appContent.style.display = "none";
     accountLabel.textContent = "";
     logoutButton.hidden = true;
 }
 
 function showSignedIn(user) {
+    // Show only the dashboard once a valid session exists.
     authPanel.hidden = true;
+    authPanel.style.display = "none";
     appContent.hidden = false;
+    appContent.style.display = "block";
     const displayName =
         user.user_metadata?.full_name ||
         user.user_metadata?.name ||
