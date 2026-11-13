@@ -30,7 +30,7 @@ function showSignedIn(user) {
         user.user_metadata?.name ||
         user.email?.split("@")[0] ||
         "Student";
-    const firstName = displayName.trim().split(/\\s+/)[0];
+    const firstName = displayName.trim().split(/\s+/)[0];
     accountLabel.textContent = displayName;
     const welcomeGreeting = document.getElementById("welcomeGreeting");
     if (welcomeGreeting) welcomeGreeting.textContent = `Hello, ${firstName}`;
