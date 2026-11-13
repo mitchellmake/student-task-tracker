@@ -7,26 +7,58 @@ const taskForm = document.getElementById("taskForm");
 const taskList = document.getElementById("taskList");
 const progress = document.getElementById("progress");
 
-// Keep existing assignment data
+// Assignments are loaded from Supabase for the signed-in student.
 let tasks = [];
-
-try {
-    const savedTasks = JSON.parse(
-        localStorage.getItem("campuskitTasks") || "[]"
-    );
-    tasks = Array.isArray(savedTasks) ? savedTasks : [];
-} catch {
-    tasks = [];
-}
+let currentUserId = null;
+let assignmentsReady = false;
+let assignmentLoadVersion = 0;
 
 let currentFilter = "all";
 
 // -----------------------------
-// ASSIGNMENT STORAGE
+// CLOUD ASSIGNMENT STORAGE
 // -----------------------------
 
-function saveTasks() {
-    localStorage.setItem("campuskitTasks", JSON.stringify(tasks));
+async function loadAssignments(user) {
+    const version = ++assignmentLoadVersion;
+    currentUserId = user.id;
+    assignmentsReady = false;
+    tasks = [];
+    displayTasks();
+    renderCalendar();
+
+    const { data, error } = await window.campuskitSupabase
+        .from("assignments")
+        .select("id, name, due_date, is_completed, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+    if (version !== assignmentLoadVersion) return;
+
+    if (error) {
+        alert("Could not load your assignments: " + error.message);
+        return;
+    }
+
+    tasks = (data || []).map(row => ({
+        id: row.id,
+        name: row.name,
+        date: row.due_date || "",
+        done: row.is_completed
+    }));
+
+    assignmentsReady = true;
+    displayTasks();
+    renderCalendar();
+}
+
+function clearAssignments() {
+    assignmentLoadVersion++;
+    currentUserId = null;
+    assignmentsReady = false;
+    tasks = [];
+    displayTasks();
+    renderCalendar();
 }
 
 function todayString() {
@@ -108,9 +140,22 @@ function displayTasks() {
         completeButton.type = "button";
         completeButton.textContent = task.done ? "Undo" : "Mark done";
 
-        completeButton.addEventListener("click", () => {
-            task.done = !task.done;
-            saveTasks();
+        completeButton.addEventListener("click", async () => {
+            if (!currentUserId || !assignmentsReady) return;
+
+            const newDoneState = !task.done;
+            const { error } = await window.campuskitSupabase
+                .from("assignments")
+                .update({ is_completed: newDoneState })
+                .eq("id", task.id)
+                .eq("user_id", currentUserId);
+
+            if (error) {
+                alert("Could not update this assignment: " + error.message);
+                return;
+            }
+
+            task.done = newDoneState;
             displayTasks();
             renderCalendar();
         });
@@ -120,10 +165,21 @@ function displayTasks() {
         deleteButton.textContent = "Delete";
         deleteButton.className = "delete-button";
 
-        deleteButton.addEventListener("click", () => {
+        deleteButton.addEventListener("click", async () => {
+            if (!currentUserId || !assignmentsReady) return;
             if (confirm("Delete this assignment?")) {
+                const { error } = await window.campuskitSupabase
+                    .from("assignments")
+                    .delete()
+                    .eq("id", task.id)
+                    .eq("user_id", currentUserId);
+
+                if (error) {
+                    alert("Could not delete this assignment: " + error.message);
+                    return;
+                }
+
                 tasks = tasks.filter(item => item.id !== task.id);
-                saveTasks();
                 displayTasks();
                 renderCalendar();
             }
@@ -148,7 +204,7 @@ function displayTasks() {
 // ADD ASSIGNMENTS
 // -----------------------------
 
-taskForm.addEventListener("submit", event => {
+taskForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const name = taskInput.value.trim();
@@ -164,14 +220,33 @@ taskForm.addEventListener("submit", event => {
         return;
     }
 
-    tasks.push({
-        id: Date.now() + Math.random(),
-        name: name,
-        date: date,
-        done: false
-    });
+    if (!currentUserId || !assignmentsReady) {
+        alert("Your assignments are still loading. Please try again.");
+        return;
+    }
 
-    saveTasks();
+    const { data, error } = await window.campuskitSupabase
+        .from("assignments")
+        .insert({
+            user_id: currentUserId,
+            name,
+            due_date: date || null,
+            is_completed: false
+        })
+        .select("id, name, due_date, is_completed")
+        .single();
+
+    if (error) {
+        alert("Could not save this assignment: " + error.message);
+        return;
+    }
+
+    tasks.push({
+        id: data.id,
+        name: data.name,
+        date: data.due_date || "",
+        done: data.is_completed
+    });
 
     taskInput.value = "";
     dueDate.value = "";
@@ -401,3 +476,29 @@ displayTasks();
 renderCalendar();
 displayDailyQuote();
 updateTimerDisplay();
+
+// Load only the signed-in student's assignments. Supabase RLS provides
+// the final access-control boundary; the user_id filter is an extra guard.
+window.campuskitSupabase.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+        // Defer the query until the auth callback has completed.
+        setTimeout(() => loadAssignments(session.user), 0);
+    } else if (event === "SIGNED_OUT") {
+        clearAssignments();
+    }
+});
+
+(async function initialiseCloudAssignments() {
+    const { data, error } = await window.campuskitSupabase.auth.getSession();
+
+    if (error) {
+        alert("Could not check your sign-in status. Please refresh.");
+        return;
+    }
+
+    if (data.session?.user) {
+        await loadAssignments(data.session.user);
+    } else {
+        clearAssignments();
+    }
+})();
