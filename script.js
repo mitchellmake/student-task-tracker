@@ -29,7 +29,7 @@ async function loadAssignments(user) {
 
     const { data, error } = await window.campuskitSupabase
         .from("assignments")
-        .select("id, name, due_date, is_completed, created_at")
+        .select("id, title, due_date, is_completed, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true });
 
@@ -42,7 +42,7 @@ async function loadAssignments(user) {
 
     tasks = (data || []).map(row => ({
         id: row.id,
-        name: row.name,
+        name: row.title,
         date: row.due_date || "",
         done: row.is_completed
     }));
@@ -229,11 +229,11 @@ taskForm.addEventListener("submit", async event => {
         .from("assignments")
         .insert({
             user_id: currentUserId,
-            name,
+            title: name,
             due_date: date || null,
             is_completed: false
         })
-        .select("id, name, due_date, is_completed")
+        .select("id, title, due_date, is_completed")
         .single();
 
     if (error) {
@@ -243,7 +243,7 @@ taskForm.addEventListener("submit", async event => {
 
     tasks.push({
         id: data.id,
-        name: data.name,
+        name: data.title,
         date: data.due_date || "",
         done: data.is_completed
     });
