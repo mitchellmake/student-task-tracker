@@ -256,20 +256,22 @@
 
     </section>
 
-    <section class="panel course-workspace">
-      <div class="section-heading"><div><span class="eyebrow">MAKE IT YOURS</span><h2>My courses</h2><p>Add your subjects once and reuse them across CampusKit.</p></div></div>
-      <form id="courseForm" class="compact-form"><input id="courseName" maxlength="60" placeholder="Course or subject name" required><button class="primary-button" type="submit">Add course</button></form>
-      <ul id="courseList" class="simple-list"></ul>
+    <section class="phase3-tools-grid">
+      <section class="panel course-workspace">
+        <div class="section-heading"><div><span class="eyebrow">ORGANISE</span><h2>My courses</h2></div></div>
+        <form id="courseForm" class="compact-form"><input id="courseName" maxlength="60" placeholder="Add a course..." required><button class="primary-button" type="submit">Add</button></form>
+        <ul id="courseList" class="simple-list"></ul>
+      </section>
+      <section class="panel backup-panel">
+        <div><span class="eyebrow">YOUR DATA</span><h2>Backup CampusKit</h2><p>Download your study data as a spreadsheet.</p></div>
+        <div class="backup-actions"><button type="button" id="exportBackup" class="secondary-button">Download CSV backup</button><small id="backupStatus" role="status">Opens in Excel or Google Sheets.</small></div>
+      </section>
     </section>
     <section class="phase2-grid">
       <section class="panel"><div class="section-heading"><div><span class="eyebrow">PLAN AHEAD</span><h2>Exam countdowns</h2><p>Keep important exam dates in view.</p></div></div><form id="examForm" class="compact-form"><input id="examName" maxlength="80" placeholder="Exam or assessment name" required><input id="examDate" type="date" required><button class="primary-button" type="submit">Add exam</button></form><ul id="examList" class="simple-list"></ul></section>
       <section class="panel"><div class="section-heading"><div><span class="eyebrow">CHECK YOUR PROGRESS</span><h2>Grade tracker</h2><p>Estimate the score needed on your final assessment.</p></div></div><form id="gradeForm" class="compact-form"><input id="gradeCourse" maxlength="60" placeholder="Course name" required><input id="gradeCurrent" type="number" min="0" max="100" step="0.1" placeholder="Current grade (%)" required><input id="gradeWeight" type="number" min="1" max="100" step="0.1" placeholder="Final exam weight (%)" required><input id="gradeTarget" type="number" min="0" max="100" step="0.1" placeholder="Target overall (%)" required><button class="primary-button" type="submit">Calculate</button></form><p id="gradeResult" class="result-text" aria-live="polite">Your required final score will appear here.</p></section>
     </section>
     <section class="panel"><div class="section-heading"><div><span class="eyebrow">YOUR CONSISTENCY</span><h2>Study insights</h2><p>Track focus sessions and weekly activity on this device.</p></div></div><div class="insight-stats"><article><strong id="focusTotal">0</strong><span>Focus minutes</span></article><article><strong id="studyStreak">0</strong><span>Day streak</span></article><article><strong id="weeklySessions">0</strong><span>Sessions this week</span></article></div><div id="weeklyChart" class="weekly-chart"></div><p id="courseInsights" class="notes-status">Complete focus sessions to build your study insights.</p></section>
-    <section class="panel backup-panel">
-      <div><span class="eyebrow">KEEP YOUR WORK SAFE</span><h2>Backup your CampusKit data</h2><p>Download a copy of your assignments and study data as a JSON file.</p></div>
-      <div class="backup-actions"><button type="button" id="exportBackup" class="secondary-button">Download my backup</button><small id="backupStatus" role="status">Your backup is created on this device.</small></div>
-    </section>
     <footer>
         <strong>CampusKit</strong>
         <p>Study with purpose. Grow at your own pace.</p>
