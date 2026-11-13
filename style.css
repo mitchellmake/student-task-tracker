@@ -821,3 +821,20 @@ body.dark-mode #logoutButton { background:#203244; color:var(--text); border-col
 .backup-panel p,.backup-actions small{color:var(--muted);font-size:13px}
 .backup-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 @media(max-width:640px){.backup-panel{align-items:flex-start}.backup-actions{width:100%;align-items:flex-start;flex-direction:column}.backup-actions button{width:100%}#noteCourse{max-width:100%}}
+
+/* Phase 3 refinement: compact course and backup tools */
+.phase3-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;margin-bottom:22px}
+.phase3-tools-grid .panel{margin-bottom:0;padding:17px 19px}
+.phase3-tools-grid .section-heading{margin-bottom:11px}
+.course-workspace .compact-form{display:flex;gap:8px;margin-bottom:8px}
+.course-workspace .compact-form input{padding:9px 11px}
+.course-workspace .compact-form button{padding:9px 13px;white-space:nowrap}
+.course-workspace .simple-list{display:flex;flex-wrap:wrap;gap:7px}
+.course-workspace .simple-list li{width:auto;justify-content:flex-start;gap:6px;background:var(--blue-pale);border-radius:8px;padding:5px 8px;font-size:12px}
+.course-workspace .simple-list .mini-button{padding:4px 7px}
+.backup-panel{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.backup-panel h2{color:var(--blue-dark);font-size:18px;margin:2px 0}
+.backup-panel p,.backup-actions small{color:var(--muted);font-size:12px}
+.backup-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.backup-actions .secondary-button{padding:9px 12px;white-space:nowrap}
+@media(max-width:700px){.phase3-tools-grid{grid-template-columns:1fr}.phase3-tools-grid .panel{padding:16px}.backup-actions{align-items:flex-start;flex-direction:column}}
