@@ -124,6 +124,7 @@ function exportCampusKitBackup(){
  getCourses().forEach(course=>{const note=localStorage.getItem(notesStorageKey(course))||"";if(note)rows.push(["Study note","",clean(course),"","","","",clean(note)]);});
  readLocal("exams").forEach(x=>rows.push(["Exam",clean(x.name),"",clean(x.date)]));
  readLocal("focusRecords").forEach(x=>rows.push(["Focus session","",clean(x.course),"","","","", "",clean(x.date),clean(x.minutes)]));
+ const goals=plannerGoals();Object.entries(goals).forEach(([date,minutes])=>rows.push(["Study goal","","","","","","","",clean(date),clean(minutes)]));
  rows.push(["Preference","","","","","","","","","","Theme: "+clean(localStorage.getItem("campuskitTheme")||"light")]);
  const csv=rows.map(row=>row.map(value=>{const s=clean(value);return '"'+s.replace(/"/g,'""')+'"';}).join(",")).join("\r\n");
  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
@@ -187,6 +188,7 @@ $("backupFile").addEventListener("change",async e=>{
   imported.filter(r=>r[0]==="Focus session"&&r[9]&&Number(r[9])>0)
    .forEach(r=>focus.push({course:r[2]||"General",date:r[8]||todayString(),minutes:Number(r[9])}));
   writeLocal("focusRecords",focus);
+   const goals=plannerGoals();imported.filter(r=>r[0]==="Study goal"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(r[8]||"")&&Number(r[9])>=15).forEach(r=>{goals[r[8]]=Math.min(600,Number(r[9]));});localStorage.setItem(localKey("dailyGoals"),JSON.stringify(goals));
   const pref=imported.find(r=>r[0]==="Preference")?.[10]||"";
   if(pref.startsWith("Theme: "))setTheme(pref.slice(7)==="dark"?"dark":"light");
   renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();
@@ -202,7 +204,7 @@ $("gradeForm").addEventListener("submit",e=>{e.preventDefault();const c=Number($
 function focusRecords(){return readLocal("focusRecords");}
 function renderInsights(){const records=focusRecords(),week=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);week.push([d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-"));} $("focusTotal").textContent=records.reduce((s,r)=>s+r.minutes,0);$("weeklySessions").textContent=records.filter(r=>week.includes(r.date)).length;let streak=0;for(let i=0;i<365;i++){const d=new Date();d.setDate(d.getDate()-i);const k=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");if(records.some(r=>r.date===k))streak++;else if(i>0)break;} $("studyStreak").textContent=streak;const chart=$("weeklyChart");chart.replaceChildren();const vals=week.map(day=>records.filter(r=>r.date===day).reduce((s,r)=>s+r.minutes,0)),max=Math.max(25,...vals);week.forEach((day,i)=>{const col=document.createElement("div"),bar=document.createElement("span"),label=document.createElement("small"),value=document.createElement("small");col.className="chart-day";bar.className="chart-bar";bar.style.height=(vals[i]/max*90+3)+"px";label.textContent=new Date(day+"T12:00:00").toLocaleDateString("en",{weekday:"short"});value.textContent=vals[i]+"m";col.append(value,bar,label);chart.append(col);});const by={};records.forEach(r=>by[r.course]=(by[r.course]||0)+r.minutes);const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];$("courseInsights").textContent=top?"Most focus time: "+top[0]+" ("+top[1]+" minutes).":"Complete focus sessions to build your study insights.";}
 function refreshTimerTaskOptions(){const s=$("timerTask");if(!s)return;const v=s.value;s.replaceChildren(new Option("Choose assignment",""));tasks.filter(t=>!t.done).forEach(t=>s.append(new Option(t.name,t.id)));s.value=v;}
-function finishFocusSession(){if(timerMode==="focus"){const minutes=Number($("focusLength").value)||25,task=tasks.find(t=>t.id===$("timerTask").value),records=focusRecords();records.push({date:todayString(),minutes:minutes,course:task?task.course:"General"});writeLocal("focusRecords",records);renderInsights();try{const C=window.AudioContext||window.webkitAudioContext;if(C){const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.value=.07;o.start();o.stop(c.currentTime+.35);}}catch(e){}timerMode="break";remainingSeconds=(Number($("breakLength").value)||5)*60;}else{timerMode="focus";remainingSeconds=(Number($("focusLength").value)||25)*60;}updateTimerDisplay();}
+function finishFocusSession(){if(timerMode==="focus"){const minutes=Number($("focusLength").value)||25,task=tasks.find(t=>t.id===$("timerTask").value),records=focusRecords();records.push({date:todayString(),minutes:minutes,course:task?task.course:"General"});writeLocal("focusRecords",records);renderInsights();renderWeeklyPlanner();try{const C=window.AudioContext||window.webkitAudioContext;if(C){const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.value=.07;o.start();o.stop(c.currentTime+.35);}}catch(e){}timerMode="break";remainingSeconds=(Number($("breakLength").value)||5)*60;}else{timerMode="focus";remainingSeconds=(Number($("focusLength").value)||25)*60;}updateTimerDisplay();}
 $("focusLength").addEventListener("change",()=>{if(!timerInterval&&timerMode==="focus"){remainingSeconds=Number($("focusLength").value)*60;updateTimerDisplay();}});$("breakLength").addEventListener("change",()=>{if(!timerInterval&&timerMode==="break"){remainingSeconds=Number($("breakLength").value)*60;updateTimerDisplay();}});
 renderInsights();refreshTimerTaskOptions();
 
@@ -232,11 +234,11 @@ function plannerWeekStart(){
  date.setDate(date.getDate()-date.getDay()+plannerWeekOffset*7);
  return date;
 }
-function plannerGoals(){return readLocal("dailyGoals");}
+function plannerGoals(){try{const value=JSON.parse(localStorage.getItem(localKey("dailyGoals"))||"{}");return value&&typeof value==="object"&&!Array.isArray(value)?value:{};}catch{return {};}}
 function savePlannerGoal(date,value){
  if(!currentUserId)return;
  const goals=plannerGoals(),minutes=Math.max(15,Math.min(600,Number(value)||60));
- goals[date]=minutes;writeLocal("dailyGoals",goals);renderWeeklyPlanner();
+ goals[date]=minutes;localStorage.setItem(localKey("dailyGoals"),JSON.stringify(goals));renderWeeklyPlanner();
 }
 function renderWeeklyPlanner(){
  const daysBox=$("plannerDays"),weekLabel=$("plannerWeekLabel");
