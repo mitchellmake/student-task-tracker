@@ -20,6 +20,7 @@
         </a>
        <div class="header-account">
     <span id="accountLabel"></span>
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
     <button type="button" id="logoutButton" hidden>
         Sign out
     </button>
@@ -129,11 +130,32 @@
             <label class="sr-only" for="dueDate">Due date</label>
             <input id="dueDate" type="date">
 
+            <label class="sr-only" for="courseInput">Course or subject</label>
+            <input id="courseInput" type="text" placeholder="Course / subject" maxlength="60">
+
+            <label class="sr-only" for="priorityInput">Priority</label>
+            <select id="priorityInput" aria-label="Priority">
+                <option value="Medium">Medium priority</option>
+                <option value="High">High priority</option>
+                <option value="Low">Low priority</option>
+            </select>
+
             <button type="submit" class="primary-button">+ Add task</button>
         </form>
 
         <div class="task-toolbar">
             <h3>Your task list</h3>
+            <div class="task-tools">
+                <label class="sr-only" for="taskSearch">Search assignments</label>
+                <input id="taskSearch" type="search" placeholder="Search assignments...">
+                <label class="sr-only" for="taskSort">Sort assignments</label>
+                <select id="taskSort">
+                    <option value="date">Sort: Due date</option>
+                    <option value="priority">Sort: Priority</option>
+                    <option value="course">Sort: Course</option>
+                    <option value="created">Sort: Recently added</option>
+                </select>
+            </div>
             <div class="filters" aria-label="Filter assignments">
                 <button type="button" data-filter="all" class="active">All</button>
                 <button type="button" data-filter="pending">Pending</button>
@@ -169,7 +191,7 @@
                  aria-label="Monthly deadline calendar"></div>
 
             <div class="calendar-legend">
-                <span class="legend-dot"></span> Assignment deadline
+                <span class="legend-dot"></span> Course-coloured deadline dots
             </div>
         </section>
 
@@ -222,6 +244,7 @@
             <textarea id="studyNotes"
                 placeholder="Start writing your notes here..."
                 rows="7" maxlength="10000"></textarea>
+            <div class="notification-row"><button type="button" id="enableReminders" class="secondary-button">Enable deadline reminders</button><small id="reminderStatus">Optional browser reminders (when CampusKit is open).</small></div>
             <p id="notesStatus" class="notes-status" aria-live="polite">
                 Notes are saved on this device.
             </p>
