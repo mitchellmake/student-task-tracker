@@ -104,7 +104,7 @@ $("profileForm").addEventListener("submit",e=>{
  e.preventDefault();if(!currentUserId)return;
  const profile={name:$("profileName").value.trim(),university:$("profileUniversity").value.trim(),programme:$("profileProgramme").value.trim(),year:$("profileYear").value};
  if(!profile.name){$("profileStatus").textContent="Please enter your name.";return;}
- try{localStorage.setItem(profileStorageKey(),JSON.stringify(profile));$("profileStatus").textContent="Profile saved on this device.";$("welcomeGreeting").textContent="Hello, "+profile.name.trim().split(/\\s+/)[0];}
+ try{localStorage.setItem(profileStorageKey(),JSON.stringify(profile));$("profileStatus").textContent="Profile saved on this device.";$("welcomeGreeting").textContent="Hello, "+profile.name.trim().split(/\s+/)[0];}
  catch{$("profileStatus").textContent="Could not save. Check this device's browser storage.";}
 });
 function courseStorageKey(){return "campuskit:courses:"+currentUserId;}
