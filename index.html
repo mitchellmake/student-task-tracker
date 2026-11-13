@@ -257,6 +257,17 @@
     </section>
 
     <section class="phase3-tools-grid">
+      <section class="panel profile-panel">
+        <div class="section-heading"><div><span class="eyebrow">YOUR DETAILS</span><h2>Student profile</h2></div></div>
+        <form id="profileForm" class="profile-form">
+          <label for="profileName">Full name</label><input id="profileName" type="text" maxlength="100" placeholder="Your name" required>
+          <label for="profileUniversity">University / college</label><input id="profileUniversity" type="text" maxlength="120" placeholder="Your institution">
+          <label for="profileProgramme">Course / programme</label><input id="profileProgramme" type="text" maxlength="120" placeholder="e.g. BTech Computer Engineering">
+          <label for="profileYear">Year of study</label><select id="profileYear"><option value="">Choose year</option><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Year 5</option><option>Other</option></select>
+          <button class="primary-button" type="submit">Save profile</button>
+        </form>
+        <small id="profileStatus" class="profile-status" role="status">Profile details are saved on this device.</small>
+      </section>
       <section class="panel course-workspace">
         <div class="section-heading"><div><span class="eyebrow">ORGANISE</span><h2>My courses</h2></div></div>
         <form id="courseForm" class="compact-form"><input id="courseName" maxlength="60" placeholder="Add a course..." required><button class="primary-button" type="submit">Add</button></form>
