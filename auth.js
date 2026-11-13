@@ -108,4 +108,21 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
     }
 })();
 
+
+const googleSignInButton = document.getElementById("googleSignInButton");
+
+googleSignInButton?.addEventListener("click", async () => {
+    showMessage("Connecting to Google...");
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: "https://mitchellmake.github.io/student-task-tracker/"
+        }
+    });
+
+    if (error) {
+        showMessage(error.message, true);
+    }
+});
+
 window.campuskitSupabase = supabaseClient;
