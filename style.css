@@ -854,3 +854,28 @@ body.dark-mode #logoutButton { background:#203244; color:var(--text); border-col
 /* Installable app control */
 .install-button{border:1px solid var(--border);border-radius:999px;padding:8px 12px;background:var(--blue);color:#fff;font-size:11px;font-weight:700}
 @media(max-width:520px){.install-button{padding:7px 9px;font-size:10px}}
+
+
+/* Phase 6: compact weekly study planner */
+.weekly-planner { padding:20px; }
+.planner-toolbar { display:flex; align-items:center; justify-content:center; gap:18px; margin:-5px 0 15px; }
+.planner-toolbar strong { min-width:190px; text-align:center; color:var(--blue-dark); font-size:13px; }
+.planner-toolbar button { padding:6px 11px; }
+.planner-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
+.planner-day { min-width:0; padding:10px 8px; border:1px solid var(--border); border-radius:11px; background:var(--blue-pale); }
+.planner-day.is-today { border-color:var(--blue); box-shadow:inset 0 0 0 1px var(--blue); }
+.planner-day h3 { color:var(--blue-dark); font-size:12px; }
+.planner-day .planner-date { display:block; color:var(--muted); font-size:10px; margin-bottom:8px; }
+.planner-day .planner-task-list { list-style:none; display:grid; gap:6px; min-height:42px; margin:0 0 9px; }
+.planner-day .planner-task-list li { font-size:10px; line-height:1.35; overflow-wrap:anywhere; padding-left:6px; border-left:2px solid var(--blue); }
+.planner-day .planner-task-list li small { display:block; color:var(--muted); font-size:9px; }
+.planner-empty { color:var(--muted); font-size:10px; }
+.planner-goal { display:flex; align-items:center; gap:4px; color:var(--muted); font-size:10px; }
+.planner-goal input { width:54px; padding:5px 4px; font-size:10px; text-align:center; }
+.planner-progress-track { height:6px; overflow:hidden; background:var(--border); border-radius:99px; margin:7px 0 4px; }
+.planner-progress-fill { height:100%; width:0; background:var(--green); border-radius:99px; transition:width .2s ease; }
+.planner-progress-label { color:var(--muted); font-size:9px; }
+.planner-footnote { color:var(--muted); font-size:10px; margin-top:12px; }
+@media(max-width:900px) { .planner-days { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:600px) { .weekly-planner { padding:15px; } .planner-days { grid-template-columns:repeat(2,minmax(0,1fr)); } .planner-day { padding:10px; } }
+@media(max-width:360px) { .planner-days { grid-template-columns:1fr; } }
