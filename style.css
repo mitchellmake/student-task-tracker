@@ -849,3 +849,8 @@ body.dark-mode #logoutButton { background:#203244; color:var(--text); border-col
 .profile-status{display:block;color:var(--muted);font-size:10px;margin-top:8px}
 @media(max-width:900px){.phase3-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.phase3-tools-grid{grid-template-columns:1fr}}
+
+
+/* Installable app control */
+.install-button{border:1px solid var(--border);border-radius:999px;padding:8px 12px;background:var(--blue);color:#fff;font-size:11px;font-weight:700}
+@media(max-width:520px){.install-button{padding:7px 9px;font-size:10px}}
