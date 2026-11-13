@@ -92,6 +92,21 @@ const localKey=n=>"campuskit:"+n+":"+(currentUserId||"guest");
 function readLocal(n){try{return JSON.parse(localStorage.getItem(localKey(n))||"[]");}catch{return [];}}
 function writeLocal(n,v){localStorage.setItem(localKey(n),JSON.stringify(v));}
 /* Phase 3: course workspace and portable backup */
+function profileStorageKey(){return "campuskit:profile:"+currentUserId;}
+function loadStudentProfile(user){
+ const form=$("profileForm");if(!form||!currentUserId)return;
+ let profile={};try{profile=JSON.parse(localStorage.getItem(profileStorageKey())||"{}");}catch{}
+ $("profileName").value=profile.name||user.user_metadata?.full_name||user.user_metadata?.name||user.email?.split("@")[0]||"";
+ $("profileUniversity").value=profile.university||"";$("profileProgramme").value=profile.programme||"";$("profileYear").value=profile.year||"";
+ $("profileStatus").textContent="Saved on this device.";
+}
+$("profileForm").addEventListener("submit",e=>{
+ e.preventDefault();if(!currentUserId)return;
+ const profile={name:$("profileName").value.trim(),university:$("profileUniversity").value.trim(),programme:$("profileProgramme").value.trim(),year:$("profileYear").value};
+ if(!profile.name){$("profileStatus").textContent="Please enter your name.";return;}
+ try{localStorage.setItem(profileStorageKey(),JSON.stringify(profile));$("profileStatus").textContent="Profile saved on this device.";$("welcomeGreeting").textContent="Hello, "+profile.name.trim().split(/\\s+/)[0];}
+ catch{$("profileStatus").textContent="Could not save. Check this device's browser storage.";}
+});
 function courseStorageKey(){return "campuskit:courses:"+currentUserId;}
 function getCourses(){if(!currentUserId)return ["General"];try{const list=JSON.parse(localStorage.getItem(courseStorageKey())||'["General"]');return [...new Set(["General",...(Array.isArray(list)?list.filter(x=>typeof x==="string"&&x.trim()):[])])];}catch{return ["General"];}}
 function saveCourses(list){if(currentUserId)localStorage.setItem(courseStorageKey(),JSON.stringify([...new Set(["General",...list.filter(Boolean)])]));}
