@@ -292,16 +292,20 @@ const quotes = [
     "Your effort today is an investment in tomorrow."
 ];
 
+let currentQuoteIndex = -1;
+
 function displayDailyQuote() {
-    const dayNumber = Math.floor(
-        new Date().getTime() / 86400000
-    );
-
-    const quoteIndex = dayNumber % quotes.length;
-
+    let nextIndex = Math.floor(Math.random() * quotes.length);
+    if (quotes.length > 1 && nextIndex === currentQuoteIndex) {
+        nextIndex = (nextIndex + 1) % quotes.length;
+    }
+    currentQuoteIndex = nextIndex;
     document.getElementById("dailyQuote").textContent =
-        '"' + quotes[quoteIndex] + '"';
+        '"' + quotes[currentQuoteIndex] + '"';
 }
+
+// Refresh the motivational quote every five minutes.
+setInterval(displayDailyQuote, 5 * 60 * 1000);
 
 // -----------------------------
 // POMODORO STUDY TIMER
