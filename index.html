@@ -27,73 +27,56 @@
     </div>
 </header>
 
-<section class="container" id="authPanel">
-    <div class="panel">
-        <span class="eyebrow">WELCOME TO CAMPUSKIT</span>
-        <h2>Your personal study space</h2>
-        <p>Sign in or create your student account.</p>
+<section class="auth-shell" id="authPanel">
+    <div class="auth-visual">
+        <div class="auth-visual-mark">✦</div>
+        <span class="eyebrow">YOUR CAMPUS, ORGANIZED</span>
+        <h1>Make space for<br><em>your best work.</em></h1>
+        <p>One calm place for assignments, deadlines and better study habits.</p>
+        <div class="auth-orbit" aria-hidden="true">
+            <div class="orbit-card orbit-card-one">📚 <span>Study smarter</span></div>
+            <div class="orbit-card orbit-card-two">✓ <span>Stay on track</span></div>
+            <div class="orbit-center">✦</div>
+        </div>
+    </div>
 
-        <button type="button" id="googleSignInButton" class="primary-button" style="width:100%; margin: 1rem 0;">
+    <div class="auth-card">
+        <div class="auth-card-heading">
+            <span class="eyebrow">WELCOME TO CAMPUSKIT</span>
+            <h2>Your study space awaits.</h2>
+            <p>Sign in to continue your progress.</p>
+        </div>
+
+        <button type="button" id="googleSignInButton" class="google-button">
+            <span class="google-g" aria-hidden="true">G</span>
             Continue with Google
         </button>
-        <p style="text-align:center;">Or use email and password</p>
 
-        <form id="registerForm">
-            <h3>Create student account</h3>
+        <div class="auth-divider"><span>or continue with email</span></div>
 
-            <input
-                id="registerName"
-                type="text"
-                placeholder="Full name"
-                maxlength="100"
-                required
-            >
-
-            <input
-                id="registerEmail"
-                type="email"
-                placeholder="Student email"
-                required
-            >
-
-            <input
-                id="registerPassword"
-                type="password"
-                placeholder="Password (minimum 8 characters)"
-                minlength="8"
-                required
-            >
-
-            <button type="submit" class="primary-button">
-                Create account
-            </button>
+        <form id="loginForm" class="auth-form">
+            <h3>Sign in</h3>
+            <label for="loginEmail">Email address</label>
+            <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="submit" class="primary-button auth-submit">Sign in to CampusKit</button>
         </form>
 
-        <hr>
-
-        <form id="loginForm">
-            <h3>Already have an account?</h3>
-
-            <input
-                id="loginEmail"
-                type="email"
-                placeholder="Email address"
-                required
-            >
-
-            <input
-                id="loginPassword"
-                type="password"
-                placeholder="Password"
-                required
-            >
-
-            <button type="submit" class="primary-button">
-                Sign in
-            </button>
-        </form>
-
+        <details class="register-details">
+            <summary>New to CampusKit? <strong>Create an account</strong></summary>
+            <form id="registerForm" class="auth-form register-form">
+                <label for="registerName">Full name</label>
+                <input id="registerName" type="text" placeholder="Your full name" maxlength="100" autocomplete="name" required>
+                <label for="registerEmail">Email address</label>
+                <input id="registerEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+                <label for="registerPassword">Create password</label>
+                <input id="registerPassword" type="password" placeholder="At least 8 characters" minlength="8" autocomplete="new-password" required>
+                <button type="submit" class="primary-button auth-submit">Create student account</button>
+            </form>
+        </details>
         <p id="authMessage" role="status" aria-live="polite"></p>
+        <p class="auth-footnote">By continuing, you agree to use CampusKit responsibly.</p>
     </div>
 </section>
 
