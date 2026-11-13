@@ -140,6 +140,7 @@
                 <option value="Low">Low priority</option>
             </select>
 
+            <label class="sr-only" for="recurrenceInput">Repeat task</label><select id="recurrenceInput" aria-label="Repeat task"><option value="none">No repeat</option><option value="daily">Repeat daily</option><option value="weekly">Repeat weekly</option></select>
             <button type="submit" class="primary-button">+ Add task</button>
         </form>
 
@@ -212,6 +213,7 @@
                 </div>
             </div>
 
+            <div class="timer-settings"><label>Focus <select id="focusLength"><option value="25">25 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option></select></label><label>Break <select id="breakLength"><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option></select></label><label>Link task <select id="timerTask"><option value="">Choose assignment</option></select></label></div>
             <div class="timer-controls">
                 <button type="button" id="startTimer" class="primary-button">Start</button>
                 <button type="button" id="resetTimer" class="secondary-button">Reset</button>
@@ -252,6 +254,11 @@
 
     </section>
 
+    <section class="phase2-grid">
+      <section class="panel"><div class="section-heading"><div><span class="eyebrow">PLAN AHEAD</span><h2>Exam countdowns</h2><p>Keep important exam dates in view.</p></div></div><form id="examForm" class="compact-form"><input id="examName" maxlength="80" placeholder="Exam or assessment name" required><input id="examDate" type="date" required><button class="primary-button" type="submit">Add exam</button></form><ul id="examList" class="simple-list"></ul></section>
+      <section class="panel"><div class="section-heading"><div><span class="eyebrow">CHECK YOUR PROGRESS</span><h2>Grade tracker</h2><p>Estimate the score needed on your final assessment.</p></div></div><form id="gradeForm" class="compact-form"><input id="gradeCourse" maxlength="60" placeholder="Course name" required><input id="gradeCurrent" type="number" min="0" max="100" step="0.1" placeholder="Current grade (%)" required><input id="gradeWeight" type="number" min="1" max="100" step="0.1" placeholder="Final exam weight (%)" required><input id="gradeTarget" type="number" min="0" max="100" step="0.1" placeholder="Target overall (%)" required><button class="primary-button" type="submit">Calculate</button></form><p id="gradeResult" class="result-text" aria-live="polite">Your required final score will appear here.</p></section>
+    </section>
+    <section class="panel"><div class="section-heading"><div><span class="eyebrow">YOUR CONSISTENCY</span><h2>Study insights</h2><p>Track focus sessions and weekly activity on this device.</p></div></div><div class="insight-stats"><article><strong id="focusTotal">0</strong><span>Focus minutes</span></article><article><strong id="studyStreak">0</strong><span>Day streak</span></article><article><strong id="weeklySessions">0</strong><span>Sessions this week</span></article></div><div id="weeklyChart" class="weekly-chart"></div><p id="courseInsights" class="notes-status">Complete focus sessions to build your study insights.</p></section>
     <footer>
         <strong>CampusKit</strong>
         <p>Study with purpose. Grow at your own pace.</p>
