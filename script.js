@@ -141,3 +141,18 @@ function refreshTimerTaskOptions(){const s=$("timerTask");if(!s)return;const v=s
 function finishFocusSession(){if(timerMode==="focus"){const minutes=Number($("focusLength").value)||25,task=tasks.find(t=>t.id===$("timerTask").value),records=focusRecords();records.push({date:todayString(),minutes:minutes,course:task?task.course:"General"});writeLocal("focusRecords",records);renderInsights();try{const C=window.AudioContext||window.webkitAudioContext;if(C){const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.value=.07;o.start();o.stop(c.currentTime+.35);}}catch(e){}timerMode="break";remainingSeconds=(Number($("breakLength").value)||5)*60;}else{timerMode="focus";remainingSeconds=(Number($("focusLength").value)||25)*60;}updateTimerDisplay();}
 $("focusLength").addEventListener("change",()=>{if(!timerInterval&&timerMode==="focus"){remainingSeconds=Number($("focusLength").value)*60;updateTimerDisplay();}});$("breakLength").addEventListener("change",()=>{if(!timerInterval&&timerMode==="break"){remainingSeconds=Number($("breakLength").value)*60;updateTimerDisplay();}});
 renderInsights();refreshTimerTaskOptions();
+
+/* CampusKit install prompt and offline app shell */
+let campusKitInstallPrompt=null;
+const installAppButton=document.getElementById("installAppButton");
+window.addEventListener("beforeinstallprompt",event=>{
+ event.preventDefault();campusKitInstallPrompt=event;if(installAppButton)installAppButton.hidden=false;
+});
+installAppButton?.addEventListener("click",async()=>{
+ if(!campusKitInstallPrompt)return;
+ campusKitInstallPrompt.prompt();
+ await campusKitInstallPrompt.userChoice;
+ campusKitInstallPrompt=null;installAppButton.hidden=true;
+});
+window.addEventListener("appinstalled",()=>{if(installAppButton)installAppButton.hidden=true;});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(error=>console.warn("CampusKit offline setup unavailable:",error)));}
