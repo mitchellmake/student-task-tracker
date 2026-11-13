@@ -10,7 +10,7 @@ function dateDelta(date){if(!date)return null;const [y,m,d]=date.split("-").map(
 function todayString(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
 dueDate.min=todayString();
 async function loadAssignments(user){
- const version=++assignmentLoadVersion;currentUserId=user.id;assignmentsReady=false;tasks=[];displayTasks();renderCalendar(); migrateLegacyNotes();renderCourses();refreshNoteCourseOptions();
+ const version=++assignmentLoadVersion;currentUserId=user.id;loadStudentProfile(user);assignmentsReady=false;tasks=[];displayTasks();renderCalendar(); migrateLegacyNotes();renderCourses();refreshNoteCourseOptions();
  const {data,error}=await window.campuskitSupabase.from("assignments").select("id,title,due_date,is_completed,created_at,course,course_color,priority,subtasks,recurrence").eq("user_id",user.id).order("created_at",{ascending:true});
  if(version!==assignmentLoadVersion)return;if(error){alert("Could not load assignments: "+error.message);return;}
  tasks=(data||[]).map(r=>({id:r.id,name:r.title,date:r.due_date||"",done:r.is_completed,course:r.course||"General",courseColor:palette.includes(r.course_color)?r.course_color:colourForCourse(r.course),priority:["High","Medium","Low"].includes(r.priority)?r.priority:"Medium",created:r.created_at,subtasks:Array.isArray(r.subtasks)?r.subtasks:[],recurrence:r.recurrence||"none"}));
