@@ -161,10 +161,15 @@ $("backupFile").addEventListener("change",async e=>{
    is_completed:r[4]==="Yes",priority:["High","Medium","Low"].includes(r[5])?r[5]:"Medium",
    recurrence:["daily","weekly"].includes(r[6])?r[6]:"none",subtasks:[]
   }));
+  const uniqueAssignmentRows=assignmentRows.filter(r=>!tasks.some(t=>
+   t.name.trim().toLowerCase()===r.title.toLowerCase()&&
+   t.course.trim().toLowerCase()===r.course.toLowerCase()&&
+   (t.date||"")===(r.due_date||"")
+  ));
   if(!imported.length)throw new Error("The backup contains no records to restore.");
   if(!confirm("Restore this backup by adding its records to your current CampusKit account? Existing records will not be deleted.")){e.target.value="";return;}
-  if(assignmentRows.length){
-   const {error}=await window.campuskitSupabase.from("assignments").insert(assignmentRows);
+  if(uniqueAssignmentRows.length){
+   const {error}=await window.campuskitSupabase.from("assignments").insert(uniqueAssignmentRows);
    if(error)throw new Error("Assignments could not be restored: "+error.message);
   }
   const courses=[...getCourses()];
@@ -186,7 +191,7 @@ $("backupFile").addEventListener("change",async e=>{
   if(pref.startsWith("Theme: "))setTheme(pref.slice(7)==="dark"?"dark":"light");
   renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();
   const {data}=await window.campuskitSupabase.auth.getUser();if(data?.user)await loadAssignments(data.user);
-  status.textContent="Restore complete: "+assignmentRows.length+" assignments imported. Existing records were kept.";
+  status.textContent="Restore complete: "+uniqueAssignmentRows.length+" new assignments imported. Existing records and duplicates were skipped.";
  }catch(err){status.textContent=err.message||"Could not restore this backup.";}
  e.target.value="";
 });
