@@ -727,3 +727,43 @@ footer strong {
     .auth-orbit { display: none; }
     .auth-card { padding: 32px 25px; }
 }
+
+
+/* Visibility and account controls */
+[hidden] { display: none !important; }
+.header-account {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+#accountLabel {
+    color: var(--blue-dark);
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--blue-light);
+    border: 1px solid #dce8f3;
+    border-radius: 999px;
+    padding: 8px 14px;
+}
+#logoutButton {
+    border: 1px solid #dce5ed;
+    border-radius: 999px;
+    padding: 9px 15px;
+    color: #52677a;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background .2s, color .2s, border-color .2s;
+}
+#logoutButton:hover {
+    color: #fff;
+    background: var(--blue);
+    border-color: var(--blue);
+}
+@media (max-width: 520px) {
+    .header-inner { padding: 10px 14px; }
+    .brand { font-size: 20px; }
+    .header-account { gap: 6px; }
+    #accountLabel { padding: 6px 9px; font-size: 11px; }
+    #logoutButton { padding: 7px 10px; font-size: 11px; }
+}
