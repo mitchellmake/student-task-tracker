@@ -767,3 +767,40 @@ footer strong {
     #accountLabel { padding: 6px 9px; font-size: 11px; }
     #logoutButton { padding: 7px 10px; font-size: 11px; }
 }
+
+
+/* Phase 1: assignment tools, automatic course colours and themes */
+select { font: inherit; min-width: 0; border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); background: #fbfdff; }
+.task-input { grid-template-columns: 2fr 1.1fr 1.2fr 1fr auto; }
+.task-tools { display:flex; gap:8px; flex-wrap:wrap; }
+.task-tools input { width:min(230px,100%); padding:9px 11px; font-size:12px; }
+.task-tools select { padding:8px 10px; font-size:12px; }
+.task-meta { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:4px; }
+.course-tag,.priority-badge,.due-badge { display:inline-flex; align-items:center; border-radius:999px; padding:3px 8px; font-size:10px; font-weight:800; }
+.course-tag { border:1px solid; }
+.priority-badge.high { background:#fae9e8; color:#a84640; }
+.priority-badge.medium { background:#fff4df; color:#916b25; }
+.priority-badge.low { background:#e9f3ed; color:#47745b; }
+.due-badge.overdue { background:#fae9e8; color:#a84640; }
+.due-badge.today { background:#fff0e0; color:#98601e; }
+.due-badge.soon { background:#eaf2fa; color:#315d87; }
+.task-actions button.edit-button { background:#edf3f8; color:#405e78; }
+.edit-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:100%; }
+.edit-form input,.edit-form select { padding:9px; font-size:12px; }
+.edit-form .edit-actions { grid-column:1/-1; display:flex; gap:8px; }
+.calendar-day { display:flex; flex-direction:column; justify-content:center; gap:3px; }
+.calendar-day .day-number { line-height:1; }
+.calendar-dots { display:flex; justify-content:center; gap:2px; min-height:5px; }
+.calendar-dots span { width:5px; height:5px; border-radius:50%; display:block; }
+.theme-toggle { border:1px solid var(--border); border-radius:999px; background:var(--blue-light); padding:8px 11px; }
+.notification-row { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:12px 0; }
+.notification-row small { color:var(--muted); font-size:11px; }
+body.dark-mode { --blue:#91b9e2; --blue-dark:#d4e5f6; --blue-light:#263d55; --blue-pale:#172635; --white:#203244; --text:#e4edf5; --muted:#a7b7c6; --border:#35495c; --shadow:0 8px 28px rgba(0,0,0,.18); background:#142230; }
+body.dark-mode .site-header,body.dark-mode .panel,body.dark-mode .stat-card { background:var(--white); }
+body.dark-mode input,body.dark-mode textarea,body.dark-mode select { background:#182a3a; color:var(--text); border-color:var(--border); }
+body.dark-mode .welcome { background:linear-gradient(115deg,#203a52,#26394b); border-color:var(--border); }
+body.dark-mode .task-item,body.dark-mode .timer-circle { background:#1a2c3c; }
+body.dark-mode .quote-panel { background:#20384d; }
+body.dark-mode #logoutButton { background:#203244; color:var(--text); border-color:var(--border); }
+@media(max-width:900px) { .task-input { grid-template-columns:repeat(2,minmax(0,1fr)); } .task-input button { grid-column:1/-1; } }
+@media(max-width:600px) { .task-tools { width:100%; } .task-tools input,.task-tools select { flex:1; width:100%; } .task-item { align-items:flex-start; flex-direction:column; } .task-actions { width:100%; } .task-actions button { flex:1; } .edit-form { grid-template-columns:1fr; } }
