@@ -188,7 +188,7 @@ $("backupFile").addEventListener("change",async e=>{
   imported.filter(r=>r[0]==="Focus session"&&r[9]&&Number(r[9])>0)
    .forEach(r=>focus.push({course:r[2]||"General",date:r[8]||todayString(),minutes:Number(r[9])}));
   writeLocal("focusRecords",focus);
-   const goals=plannerGoals();imported.filter(r=>r[0]==="Study goal"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(r[8]||"")&&Number(r[9])>=15).forEach(r=>{goals[r[8]]=Math.min(600,Number(r[9]));});localStorage.setItem(localKey("dailyGoals"),JSON.stringify(goals));
+   const goals=plannerGoals();imported.filter(r=>r[0]==="Study goal"&&/^\d{4}-\d{2}-\d{2}$/.test(r[8]||"")&&Number(r[9])>=15).forEach(r=>{goals[r[8]]=Math.min(600,Number(r[9]));});localStorage.setItem(localKey("dailyGoals"),JSON.stringify(goals));
   const pref=imported.find(r=>r[0]==="Preference")?.[10]||"";
   if(pref.startsWith("Theme: "))setTheme(pref.slice(7)==="dark"?"dark":"light");
   renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();
