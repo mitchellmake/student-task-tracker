@@ -130,7 +130,66 @@ function exportCampusKitBackup(){
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="campuskit-backup-"+todayString()+".csv";document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
  $("backupStatus").textContent="CSV backup downloaded. Open it with Excel or Google Sheets.";
 }
+
 $("exportBackup").addEventListener("click",exportCampusKitBackup);
+function parseBackupCSV(text){
+ const rows=[];let row=[],field="",quoted=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i];
+  if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}
+  else if(ch==='"')quoted=true;
+  else if(ch===","){row.push(field);field="";}
+  else if(ch==="\\n"){row.push(field);rows.push(row);row=[];field="";}
+  else if(ch!=="\\r")field+=ch;
+ }
+ if(field.length||row.length){row.push(field);rows.push(row);}
+ return rows;
+}
+$("importBackup").addEventListener("click",()=>{$("backupFile").click();});
+$("backupFile").addEventListener("change",async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ const status=$("backupStatus");
+ if(!currentUserId||!assignmentsReady){status.textContent="Sign in and wait for assignments to load first.";e.target.value="";return;}
+ try{
+  const text=await file.text(),rows=parseBackupCSV(text.replace(/^\\uFEFF/,""));
+  const expected=["Record type","Name","Course","Due date","Completed","Priority","Repeat","Notes","Date","Minutes","Preference"];
+  if(!rows.length||expected.some((v,i)=>rows[0]?.[i]!==v))throw new Error("This file is not a CampusKit CSV backup.");
+  const imported=rows.slice(1).filter(r=>r.some(v=>v!==""));
+  const assignmentRows=imported.filter(r=>r[0]==="Assignment"&&r[1]?.trim()).map(r=>({
+   user_id:currentUserId,title:r[1].trim(),course:r[2]?.trim()||"General",
+   due_date:/^\\d{4}-\\d{2}-\\d{2}$/.test(r[3]||"")?r[3]:null,
+   is_completed:r[4]==="Yes",priority:["High","Medium","Low"].includes(r[5])?r[5]:"Medium",
+   recurrence:["daily","weekly"].includes(r[6])?r[6]:"none",subtasks:[]
+  }));
+  if(!imported.length)throw new Error("The backup contains no records to restore.");
+  if(!confirm("Restore this backup by adding its records to your current CampusKit account? Existing records will not be deleted.")){e.target.value="";return;}
+  if(assignmentRows.length){
+   const {error}=await window.campuskitSupabase.from("assignments").insert(assignmentRows);
+   if(error)throw new Error("Assignments could not be restored: "+error.message);
+  }
+  const courses=[...getCourses()];
+  imported.filter(r=>r[0]==="Course"&&r[2]?.trim()).forEach(r=>courses.push(r[2].trim()));
+  saveCourses(courses);
+  imported.filter(r=>r[0]==="Study note"&&r[2]).forEach(r=>{
+   const key=notesStorageKey(r[2]);const old=localStorage.getItem(key)||"";
+   if(r[7]&&!old)localStorage.setItem(key,r[7]);
+  });
+  const exams=readLocal("exams");
+  imported.filter(r=>r[0]==="Exam"&&r[1]?.trim()&&/^\\d{4}-\\d{2}-\\d{2}$/.test(r[3]||""))
+   .forEach(r=>{if(!exams.some(x=>x.name===r[1]&&x.date===r[3]))exams.push({name:r[1],date:r[3]});});
+  writeLocal("exams",exams);
+  const focus=readLocal("focusRecords");
+  imported.filter(r=>r[0]==="Focus session"&&r[9]&&Number(r[9])>0)
+   .forEach(r=>focus.push({course:r[2]||"General",date:r[8]||todayString(),minutes:Number(r[9])}));
+  writeLocal("focusRecords",focus);
+  const pref=imported.find(r=>r[0]==="Preference")?.[10]||"";
+  if(pref.startsWith("Theme: "))setTheme(pref.slice(7)==="dark"?"dark":"light");
+  renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();
+  const {data}=await window.campuskitSupabase.auth.getUser();if(data?.user)await loadAssignments(data.user);
+  status.textContent="Restore complete: "+assignmentRows.length+" assignments imported. Existing records were kept.";
+ }catch(err){status.textContent=err.message||"Could not restore this backup.";}
+ e.target.value="";
+});
 
 function renderExams(){const list=$("examList");if(!list)return;list.replaceChildren();const exams=readLocal("exams").sort((a,b)=>a.date.localeCompare(b.date));if(!exams.length){const li=document.createElement("li");li.textContent="No exams added yet.";list.append(li);return;}exams.forEach((x,i)=>{const li=document.createElement("li"),name=document.createElement("span"),count=document.createElement("small"),del=document.createElement("button");const days=Math.ceil((new Date(x.date+"T00:00:00")-new Date(todayString()+"T00:00:00"))/86400000);name.textContent=x.name;count.textContent=days<0?"Date passed":days===0?"Today":days+" days left";del.className="mini-button";del.textContent="Remove";del.addEventListener("click",()=>{const a=readLocal("exams");a.splice(i,1);writeLocal("exams",a);renderExams();});li.append(name,count,del);list.append(li);});}
 $("examForm").addEventListener("submit",e=>{e.preventDefault();const name=$("examName").value.trim(),date=$("examDate").value;if(!name||!date)return;const a=readLocal("exams");a.push({name,date});writeLocal("exams",a);e.target.reset();renderExams();});$("examDate").min=todayString();renderExams();
