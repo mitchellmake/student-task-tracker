@@ -879,3 +879,16 @@ body.dark-mode #logoutButton { background:#203244; color:var(--text); border-col
 @media(max-width:900px) { .planner-days { grid-template-columns:repeat(4,minmax(0,1fr)); } }
 @media(max-width:600px) { .weekly-planner { padding:15px; } .planner-days { grid-template-columns:repeat(2,minmax(0,1fr)); } .planner-day { padding:10px; } }
 @media(max-width:360px) { .planner-days { grid-template-columns:1fr; } }
+
+/* Phase 7: editable timetable slots */
+.planner-slot-list{display:grid;gap:5px;margin:8px 0}
+.planner-slot{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;padding:6px 7px;border-radius:7px;background:var(--white);border:1px solid var(--border);font-size:10px}
+.planner-slot strong{display:block;color:var(--blue-dark);font-size:10px}
+.planner-slot small{display:block;color:var(--muted);font-size:9px}
+.planner-slot-remove{border:0;background:transparent;color:var(--muted);font-size:13px;padding:0 3px;cursor:pointer}
+.planner-add-slot{width:100%;padding:6px 5px;margin:5px 0 9px;border:1px dashed var(--blue);border-radius:7px;background:transparent;color:var(--blue-dark);font-size:10px;font-weight:700;cursor:pointer}
+.planner-slot-form{display:grid;gap:5px;margin:6px 0 9px;padding:7px;background:var(--white);border:1px solid var(--border);border-radius:8px}
+.planner-slot-form input{min-width:0;width:100%;padding:5px;font-size:10px}
+.planner-slot-times{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.planner-slot-actions{display:flex;gap:5px}
+.planner-slot-actions button{flex:1;padding:5px;font-size:10px}
