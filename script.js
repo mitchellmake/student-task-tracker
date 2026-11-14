@@ -180,7 +180,7 @@ function applyWorkspaceData(data){
   if(data.theme)localStorage.setItem("campuskitTheme",data.theme);
  }finally{workspaceApplyingCloud=false;}
  if(data.theme)setTheme(data.theme);
- if(data.profile){$("profileName").value=data.profile.name||"";$("profileUniversity").value=data.profile.university||"";$("profileProgramme").value=data.profile.programme||"";$("profileYear").value=data.profile.year||"";$("welcomeGreeting").textContent="Hello, "+(data.profile.name||"Student").trim().split(/\\s+/)[0];}
+ if(data.profile){$("profileName").value=data.profile.name||"";$("profileUniversity").value=data.profile.university||"";$("profileProgramme").value=data.profile.programme||"";$("profileYear").value=data.profile.year||"";$("welcomeGreeting").textContent="Hello, "+(data.profile.name||"Student").trim().split(/\s+/)[0];}
  renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();renderWeeklyPlanner();
 }
 async function syncWorkspace(){
