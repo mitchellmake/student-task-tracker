@@ -15,7 +15,7 @@ async function loadAssignments(user){
  if(version!==assignmentLoadVersion)return;if(error){alert("Could not load assignments: "+error.message);return;}
  tasks=(data||[]).map(r=>({id:r.id,name:r.title,date:r.due_date||"",done:r.is_completed,course:r.course||"General",courseColor:palette.includes(r.course_color)?r.course_color:colourForCourse(r.course),priority:["High","Medium","Low"].includes(r.priority)?r.priority:"Medium",created:r.created_at,subtasks:Array.isArray(r.subtasks)?r.subtasks:[],recurrence:r.recurrence||"none"}));
  const knownCourses=getCourses();tasks.forEach(t=>{if(!knownCourses.some(c=>c.toLowerCase()===t.course.toLowerCase()))knownCourses.push(t.course);});saveCourses(knownCourses);renderCourses();
- assignmentsReady=true;displayTasks();renderCalendar();checkReminders();refreshTimerTaskOptions();renderInsights();
+ assignmentsReady=true;displayTasks();renderCalendar();checkReminders();refreshTimerTaskOptions();renderInsights();renderWeeklyPlanner();
 }
 function clearAssignments(){assignmentLoadVersion++;currentUserId=null;assignmentsReady=false;tasks=[];displayTasks();renderCalendar();}
 function updateDashboard(){const done=tasks.filter(t=>t.done).length;$("totalTasks").textContent=tasks.length;$("pendingTasks").textContent=tasks.length-done;$("completedTasks").textContent=done;progress.textContent=`Completed: ${done} / ${tasks.length}`;}
@@ -245,29 +245,37 @@ function renderWeeklyPlanner(){
  if(!daysBox||!weekLabel)return;
  daysBox.replaceChildren();
  if(!currentUserId){weekLabel.textContent="Sign in to plan your week";return;}
- const start=plannerWeekStart(),end=new Date(start);end.setDate(start.getDate()+6);
- const fmt=d=>d.toLocaleDateString("en",{day:"numeric",month:"short"});
- weekLabel.textContent=fmt(start)+" – "+fmt(end);
- const goals=plannerGoals(),records=readLocal("focusRecords");
- for(let i=0;i<7;i++){
-  const date=new Date(start);date.setDate(start.getDate()+i);
-  const key=plannerDateKey(date),card=document.createElement("article");
-  card.className="planner-day"+(key===todayString()?" is-today":"");
-  const heading=document.createElement("h3");heading.textContent=date.toLocaleDateString("en",{weekday:"short"});
-  const dateText=document.createElement("small");dateText.className="planner-date";dateText.textContent=fmt(date)+(key===todayString()?" · Today":"");
-  const list=document.createElement("ul");list.className="planner-task-list";
-  const dueTasks=tasks.filter(task=>task.date===key&&!task.done);
-  if(dueTasks.length){
-   dueTasks.forEach(task=>{const li=document.createElement("li"),name=document.createElement("span"),course=document.createElement("small");name.textContent=task.name;course.textContent=task.course;li.style.borderLeftColor=task.courseColor||colourForCourse(task.course);li.append(name,course);list.append(li);});
-  }else{const empty=document.createElement("li");empty.className="planner-empty";empty.textContent="No deadlines";list.append(empty);}
-  const goalRow=document.createElement("label");goalRow.className="planner-goal";goalRow.textContent="Goal";
-  const goalInput=document.createElement("input");goalInput.type="number";goalInput.min="15";goalInput.max="600";goalInput.step="15";goalInput.value=goals[key]||60;goalInput.setAttribute("aria-label","Study goal in minutes for "+key);goalInput.addEventListener("change",()=>savePlannerGoal(key,goalInput.value));
-  const goalUnit=document.createElement("span");goalUnit.textContent="min";goalRow.append(goalInput,goalUnit);
-  const completed=records.filter(record=>record.date===key).reduce((sum,record)=>sum+(Number(record.minutes)||0),0);
-  const target=Number(goals[key]||60),track=document.createElement("div"),fill=document.createElement("div"),label=document.createElement("small");
-  track.className="planner-progress-track";fill.className="planner-progress-fill";fill.style.width=Math.min(100,completed/target*100)+"%";track.append(fill);
-  label.className="planner-progress-label";label.textContent=completed+" / "+target+" min";
-  card.append(heading,dateText,list,goalRow,track,label);daysBox.append(card);
+ try{
+  const start=plannerWeekStart(),end=new Date(start);end.setDate(start.getDate()+6);
+  const fmt=d=>d.toLocaleDateString("en",{day:"numeric",month:"short"});
+  weekLabel.textContent=fmt(start)+" – "+fmt(end);
+  const rawGoals=plannerGoals(),goals=rawGoals&&typeof rawGoals==="object"?rawGoals:{};
+  const rawRecords=readLocal("focusRecords"),records=Array.isArray(rawRecords)?rawRecords:[];
+  const safeTasks=Array.isArray(tasks)?tasks:[];
+  for(let i=0;i<7;i++){
+   const date=new Date(start);date.setDate(start.getDate()+i);
+   const key=plannerDateKey(date),card=document.createElement("article");
+   card.className="planner-day"+(key===todayString()?" is-today":"");
+   const heading=document.createElement("h3");heading.textContent=date.toLocaleDateString("en",{weekday:"short"});
+   const dateText=document.createElement("small");dateText.className="planner-date";dateText.textContent=fmt(date)+(key===todayString()?" · Today":"");
+   const list=document.createElement("ul");list.className="planner-task-list";
+   const dueTasks=safeTasks.filter(task=>task.date===key&&!task.done);
+   if(dueTasks.length){
+    dueTasks.forEach(task=>{const li=document.createElement("li"),name=document.createElement("span"),course=document.createElement("small");name.textContent=task.name||"Assignment";course.textContent=task.course||"General";li.style.borderLeftColor=task.courseColor||colourForCourse(task.course);li.append(name,course);list.append(li);});
+   }else{const empty=document.createElement("li");empty.className="planner-empty";empty.textContent="No deadlines";list.append(empty);}
+   const goalRow=document.createElement("label");goalRow.className="planner-goal";goalRow.append(document.createTextNode("Goal "));
+   const goalInput=document.createElement("input");goalInput.type="number";goalInput.min="15";goalInput.max="600";goalInput.step="15";goalInput.value=goals[key]||60;goalInput.setAttribute("aria-label","Study goal in minutes for "+key);goalInput.addEventListener("change",()=>savePlannerGoal(key,goalInput.value));
+   const goalUnit=document.createElement("span");goalUnit.textContent="min";goalRow.append(goalInput,goalUnit);
+   const completed=records.filter(record=>record&&record.date===key).reduce((sum,record)=>sum+(Number(record.minutes)||0),0);
+   const target=Number(goals[key]||60),track=document.createElement("div"),fill=document.createElement("div"),label=document.createElement("small");
+   track.className="planner-progress-track";fill.className="planner-progress-fill";fill.style.width=Math.min(100,completed/target*100)+"%";track.append(fill);
+   label.className="planner-progress-label";label.textContent=completed+" / "+target+" min";
+   card.append(heading,dateText,list,goalRow,track,label);daysBox.append(card);
+  }
+ }catch(error){
+  console.error("CampusKit weekly planner:",error);
+  weekLabel.textContent="Weekly plan";
+  const message=document.createElement("p");message.className="planner-empty";message.textContent="Could not load this week's planner. Please refresh the app.";daysBox.append(message);
  }
 }
 $("plannerPrevWeek").addEventListener("click",()=>{plannerWeekOffset--;renderWeeklyPlanner();});
