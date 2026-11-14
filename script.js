@@ -125,6 +125,7 @@ function exportCampusKitBackup(){
  readLocal("exams").forEach(x=>rows.push(["Exam",clean(x.name),"",clean(x.date)]));
  readLocal("focusRecords").forEach(x=>rows.push(["Focus session","",clean(x.course),"","","","", "",clean(x.date),clean(x.minutes)]));
  const goals=plannerGoals();Object.entries(goals).forEach(([date,minutes])=>rows.push(["Study goal","","","","","","","",clean(date),clean(minutes)]));
+  Object.entries(plannerSlots()).forEach(([date,slots])=>slots.forEach(slot=>rows.push(["Study slot",clean(slot.title),clean(slot.course),clean(slot.start),clean(slot.end),"","","",clean(date)])));
  rows.push(["Preference","","","","","","","","","","Theme: "+clean(localStorage.getItem("campuskitTheme")||"light")]);
  const csv=rows.map(row=>row.map(value=>{const s=clean(value);return '"'+s.replace(/"/g,'""')+'"';}).join(",")).join("\r\n");
  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
@@ -189,7 +190,8 @@ $("backupFile").addEventListener("change",async e=>{
    .forEach(r=>focus.push({course:r[2]||"General",date:r[8]||todayString(),minutes:Number(r[9])}));
   writeLocal("focusRecords",focus);
    const goals=plannerGoals();imported.filter(r=>r[0]==="Study goal"&&/^\d{4}-\d{2}-\d{2}$/.test(r[8]||"")&&Number(r[9])>=15).forEach(r=>{goals[r[8]]=Math.min(600,Number(r[9]));});localStorage.setItem(localKey("dailyGoals"),JSON.stringify(goals));
-  const pref=imported.find(r=>r[0]==="Preference")?.[10]||"";
+  const savedSlots=plannerSlots();imported.filter(r=>r[0]==="Study slot"&&/^\d{4}-\d{2}-\d{2}$/.test(r[8]||"")&&r[1]?.trim()&&/^\d{2}:\d{2}$/.test(r[3]||"")&&/^\d{2}:\d{2}$/.test(r[4]||"")).forEach(r=>{(savedSlots[r[8]]||(savedSlots[r[8]]=[])).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:r[1],course:r[2]||"",start:r[3],end:r[4]});});localStorage.setItem(localKey("plannerSlots"),JSON.stringify(savedSlots));
+   const pref=imported.find(r=>r[0]==="Preference")?.[10]||"";
   if(pref.startsWith("Theme: "))setTheme(pref.slice(7)==="dark"?"dark":"light");
   renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();
   const {data}=await window.campuskitSupabase.auth.getUser();if(data?.user)await loadAssignments(data.user);
@@ -234,6 +236,8 @@ function plannerWeekStart(){
  date.setDate(date.getDate()-date.getDay()+plannerWeekOffset*7);
  return date;
 }
+function plannerSlots(){try{const value=JSON.parse(localStorage.getItem(localKey("plannerSlots"))||"{}");return value&&typeof value==="object"&&!Array.isArray(value)?value:{};}catch{return {};}}
+function savePlannerSlots(value){localStorage.setItem(localKey("plannerSlots"),JSON.stringify(value));}
 function plannerGoals(){try{const value=JSON.parse(localStorage.getItem(localKey("dailyGoals"))||"{}");return value&&typeof value==="object"&&!Array.isArray(value)?value:{};}catch{return {};}}
 function savePlannerGoal(date,value){
  if(!currentUserId)return;
@@ -251,6 +255,7 @@ function renderWeeklyPlanner(){
   weekLabel.textContent=fmt(start)+" – "+fmt(end);
   const rawGoals=plannerGoals(),goals=rawGoals&&typeof rawGoals==="object"?rawGoals:{};
   const rawRecords=readLocal("focusRecords"),records=Array.isArray(rawRecords)?rawRecords:[];
+   const slotsByDate=plannerSlots();
   const safeTasks=Array.isArray(tasks)?tasks:[];
   for(let i=0;i<7;i++){
    const date=new Date(start);date.setDate(start.getDate()+i);
@@ -270,7 +275,11 @@ function renderWeeklyPlanner(){
    const target=Number(goals[key]||60),track=document.createElement("div"),fill=document.createElement("div"),label=document.createElement("small");
    track.className="planner-progress-track";fill.className="planner-progress-fill";fill.style.width=Math.min(100,completed/target*100)+"%";track.append(fill);
    label.className="planner-progress-label";label.textContent=completed+" / "+target+" min";
-   card.append(heading,dateText,list,goalRow,track,label);daysBox.append(card);
+   const slotList=document.createElement("div");slotList.className="planner-slot-list";
+   (slotsByDate[key]||[]).forEach(slot=>{const item=document.createElement("div"),details=document.createElement("div"),title=document.createElement("strong"),meta=document.createElement("small"),remove=document.createElement("button");item.className="planner-slot";title.textContent=slot.title;meta.textContent=slot.start+"–"+slot.end+(slot.course?" · "+slot.course:"");details.append(title,meta);remove.type="button";remove.className="planner-slot-remove";remove.textContent="×";remove.setAttribute("aria-label","Remove "+slot.title);remove.addEventListener("click",()=>{const all=plannerSlots();all[key]=(all[key]||[]).filter(x=>x.id!==slot.id);savePlannerSlots(all);renderWeeklyPlanner();});item.append(details,remove);slotList.append(item);});
+   const addSlot=document.createElement("button");addSlot.type="button";addSlot.className="planner-add-slot";addSlot.textContent="+ Add time slot";
+   addSlot.addEventListener("click",()=>{if(card.querySelector(".planner-slot-form"))return;const form=document.createElement("form");form.className="planner-slot-form";const titleInput=document.createElement("input");titleInput.type="text";titleInput.placeholder="Study topic (e.g. Mathematics)";titleInput.maxLength=70;titleInput.required=true;const courseInput=document.createElement("input");courseInput.type="text";courseInput.placeholder="Course (optional)";courseInput.maxLength=50;const times=document.createElement("div");times.className="planner-slot-times";const from=document.createElement("input"),to=document.createElement("input");from.type=to.type="time";from.required=to.required=true;from.value="09:00";to.value="10:00";times.append(from,to);const actions=document.createElement("div");actions.className="planner-slot-actions";const save=document.createElement("button");save.type="submit";save.className="primary-button";save.textContent="Save";const cancel=document.createElement("button");cancel.type="button";cancel.className="secondary-button";cancel.textContent="Cancel";cancel.addEventListener("click",()=>form.remove());actions.append(save,cancel);form.append(titleInput,courseInput,times,actions);addSlot.after(form);titleInput.focus();form.addEventListener("submit",e=>{e.preventDefault();if(!titleInput.value.trim()||!from.value||!to.value||to.value<=from.value){alert("Enter a topic and a valid time range. The end time must be later than the start time.");return;}const all=plannerSlots();(all[key]||(all[key]=[])).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:titleInput.value.trim(),course:courseInput.value.trim(),start:from.value,end:to.value});all[key].sort((a,b)=>a.start.localeCompare(b.start));savePlannerSlots(all);renderWeeklyPlanner();});});
+   card.append(heading,dateText,list,slotList,addSlot,goalRow,track,label);daysBox.append(card);
   }
  }catch(error){
   console.error("CampusKit weekly planner:",error);
