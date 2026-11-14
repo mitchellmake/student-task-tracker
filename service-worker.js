@@ -1,4 +1,4 @@
-const CACHE_NAME = "campuskit-shell-v2";
+const CACHE_NAME = "campuskit-shell-v3";
 const APP_SHELL = [
   "./", "./index.html", "./style.css", "./script.js", "./auth.js",
   "./supabase-config.js", "./manifest.webmanifest", "./campuskit-icon.svg"
