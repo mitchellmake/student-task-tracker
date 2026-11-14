@@ -80,8 +80,52 @@ function loadCourseNotes(){if(!currentUserId)return;activeNoteCourse=noteCourse.
 noteCourse.addEventListener("change",loadCourseNotes);
 studyNotes.addEventListener("input",()=>{if(!currentUserId){notesStatus.textContent="Sign in to save notes to your student account on this device.";return;}try{localStorage.setItem(notesStorageKey(activeNoteCourse),studyNotes.value);notesStatus.textContent="Saved under "+activeNoteCourse+" on this device.";}catch{notesStatus.textContent="Unable to save. Check device storage."; }});
 const themeToggle=$("themeToggle");function setTheme(mode){document.body.classList.toggle("dark-mode",mode==="dark");themeToggle.textContent=mode==="dark"?"☀️":"🌙";themeToggle.setAttribute("aria-label",mode==="dark"?"Switch to light mode":"Switch to dark mode");localStorage.setItem("campuskitTheme",mode);}setTheme(localStorage.getItem("campuskitTheme")||"light");themeToggle.addEventListener("click",()=>setTheme(document.body.classList.contains("dark-mode")?"light":"dark"));
-const reminderLogKey=()=>`campuskitReminders:${currentUserId||"guest"}`;function checkReminders(){if(!("Notification"in window)||Notification.permission!=="granted"||!currentUserId)return;const now=new Date(),log=JSON.parse(localStorage.getItem(reminderLogKey())||"{}");tasks.filter(t=>!t.done&&t.date).forEach(t=>{const [y,m,d]=t.date.split("-").map(Number);const due=new Date(y,m-1,d,9,0,0);[["day",86400000],["hour",3600000]].forEach(([kind,offset])=>{const target=due.getTime()-offset;if(now.getTime()>=target&&now.getTime()<target+60000&&!log[t.id+":"+kind]){new Notification("CampusKit deadline reminder",{body:`${t.name} (${t.course}) is due ${kind==="day"?"tomorrow":"in about one hour"}.`});log[t.id+":"+kind]=true;}});});localStorage.setItem(reminderLogKey(),JSON.stringify(log));}
-$("enableReminders").addEventListener("click",async()=>{if(!("Notification"in window)){ $("reminderStatus").textContent="This browser does not support notifications.";return;}const permission=await Notification.requestPermission();$("reminderStatus").textContent=permission==="granted"?"Reminders enabled. Keep CampusKit open to receive them.": "Notifications were not enabled.";checkReminders();});
+const reminderLogKey=()=>`campuskitReminders:${currentUserId||"guest"}`;
+function checkReminders(){
+ if(!("Notification" in window)||Notification.permission!=="granted"||!currentUserId)return;
+ const now=new Date(),log=JSON.parse(localStorage.getItem(reminderLogKey())||"{}");
+ const notify=(key,title,body,target)=>{
+  const age=now.getTime()-target.getTime();
+  if(age>=0&&age<10*60000&&!log[key]){
+   new Notification(title,{body});
+   log[key]=now.getTime();
+  }
+ };
+ const at=(date,time="09:00")=>{
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date||"")||!/^\\d{2}:\\d{2}$/.test(time||""))return null;
+  const [y,m,d]=date.split("-").map(Number),[h,min]=time.split(":").map(Number);
+  const value=new Date(y,m-1,d,h,min,0,0);
+  return Number.isNaN(value.getTime())?null:value;
+ };
+ tasks.filter(t=>!t.done&&t.date).forEach(t=>{
+  const due=at(t.date);if(!due)return;
+  [["day",86400000],["hour",3600000]].forEach(([kind,offset])=>{
+   const target=new Date(due.getTime()-offset);
+   notify("assignment:"+t.id+":"+kind,"CampusKit assignment reminder",`${t.name} (${t.course||"General"}) is due ${kind==="day"?"tomorrow":"in about one hour"}.`,target);
+  });
+ });
+ readLocal("exams").filter(x=>x.date&&x.name).forEach((exam,index)=>{
+  const due=at(exam.date);if(!due)return;
+  [["week",7*86400000],["day",86400000],["hour",3600000]].forEach(([kind,offset])=>{
+   const target=new Date(due.getTime()-offset);
+   notify("exam:"+exam.date+":"+exam.name+":"+kind,"CampusKit exam reminder",`${exam.name} is ${kind==="week"?"in one week":kind==="day"?"tomorrow":"in about one hour"}.`,target);
+  });
+ });
+ const slots=plannerSlots();
+ Object.entries(slots).forEach(([date,items])=>{
+  if(!Array.isArray(items))return;
+  items.forEach((slot,index)=>{
+   const start=at(date,slot.start);if(!start||!slot.title)return;
+   const target=new Date(start.getTime()-15*60000);
+   const slotKey=slot.id||`${date}:${slot.start}:${slot.title}:${index}`;
+   notify("study-slot:"+slotKey,"CampusKit study session",`${slot.title}${slot.course?" · "+slot.course:""} starts in 15 minutes.`,target);
+  });
+ });
+ const cutoff=now.getTime()-60*86400000;
+ Object.keys(log).forEach(key=>{if(typeof log[key]==="number"&&log[key]<cutoff)delete log[key];});
+ localStorage.setItem(reminderLogKey(),JSON.stringify(log));
+}
+$("enableReminders").addEventListener("click",async()=>{if(!("Notification"in window)){ $("reminderStatus").textContent="This browser does not support notifications.";return;}const permission=await Notification.requestPermission();$("reminderStatus").textContent=permission==="granted"?"Reminders on: assignments, exams and study sessions. Keep CampusKit open.": "Notifications were not enabled.";checkReminders();});
 setInterval(checkReminders,60000);
 displayTasks();renderCalendar();displayDailyQuote();updateTimerDisplay();
 window.campuskitSupabase.auth.onAuthStateChange((event,session)=>{if(session?.user)setTimeout(()=>loadAssignments(session.user),0);else if(event==="SIGNED_OUT")clearAssignments();});
