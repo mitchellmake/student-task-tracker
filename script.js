@@ -15,7 +15,7 @@ async function loadAssignments(user){
  if(version!==assignmentLoadVersion)return;if(error){alert("Could not load assignments: "+error.message);return;}
  tasks=(data||[]).map(r=>({id:r.id,name:r.title,date:r.due_date||"",done:r.is_completed,course:r.course||"General",courseColor:palette.includes(r.course_color)?r.course_color:colourForCourse(r.course),priority:["High","Medium","Low"].includes(r.priority)?r.priority:"Medium",created:r.created_at,subtasks:Array.isArray(r.subtasks)?r.subtasks:[],recurrence:r.recurrence||"none"}));
  const knownCourses=getCourses();tasks.forEach(t=>{if(!knownCourses.some(c=>c.toLowerCase()===t.course.toLowerCase()))knownCourses.push(t.course);});saveCourses(knownCourses);renderCourses();
- assignmentsReady=true;displayTasks();renderCalendar();checkReminders();refreshTimerTaskOptions();renderInsights();renderWeeklyPlanner();
+ assignmentsReady=true;displayTasks();renderCalendar();checkReminders();refreshTimerTaskOptions();renderInsights();renderWeeklyPlanner();await syncWorkspace();
 }
 function clearAssignments(){assignmentLoadVersion++;currentUserId=null;assignmentsReady=false;tasks=[];displayTasks();renderCalendar();}
 function updateDashboard(){const done=tasks.filter(t=>t.done).length;$("totalTasks").textContent=tasks.length;$("pendingTasks").textContent=tasks.length-done;$("completedTasks").textContent=done;progress.textContent=`Completed: ${done} / ${tasks.length}`;}
@@ -135,6 +135,97 @@ window.campuskitSupabase.auth.onAuthStateChange((event,session)=>{if(session?.us
 const localKey=n=>"campuskit:"+n+":"+(currentUserId||"guest");
 function readLocal(n){try{return JSON.parse(localStorage.getItem(localKey(n))||"[]");}catch{return [];}}
 function writeLocal(n,v){localStorage.setItem(localKey(n),JSON.stringify(v));}
+
+/* Phase 9: private cloud sync for student workspace data */
+let workspaceSyncReady=false,workspaceSyncBusy=false,workspaceSyncQueued=false,workspaceSyncTimer=null,workspaceApplyingCloud=false;
+function workspaceStatus(message,isError=false){
+ const el=$("cloudSyncStatus");if(el){el.textContent=message;el.style.color=isError?"#B45309":"";}
+}
+function workspaceLocalSnapshot(){
+ const id=currentUserId, prefix="campuskit:";
+ const data={profile:null,courses:["General"],notes:{},exams:[],focusRecords:[],plannerSlots:{},dailyGoals:{},theme:localStorage.getItem("campuskitTheme")||"light"};
+ try{data.profile=JSON.parse(localStorage.getItem(prefix+"profile:"+id)||"null");}catch{}
+ try{const c=JSON.parse(localStorage.getItem(prefix+"courses:"+id)||'["General"]');if(Array.isArray(c))data.courses=[...new Set(["General",...c.filter(x=>typeof x==="string"&&x.trim())])];}catch{}
+ const notePrefix=prefix+"notes:"+id+":";
+ for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.startsWith(notePrefix)){const course=decodeURIComponent(key.slice(notePrefix.length));data.notes[course]=localStorage.getItem(key)||"";}}
+ for(const name of ["exams","focusRecords"]){try{const v=JSON.parse(localStorage.getItem(prefix+name+":"+id)||"[]");if(Array.isArray(v))data[name]=v;}catch{}}
+ for(const name of ["plannerSlots","dailyGoals"]){try{const v=JSON.parse(localStorage.getItem(prefix+name+":"+id)||"{}");if(v&&typeof v==="object"&&!Array.isArray(v))data[name]=v;}catch{}}
+ return data;
+}
+function mergeWorkspaceData(cloud,local){
+ const c=cloud&&typeof cloud==="object"?cloud:{},out={...c,...local};
+ out.profile=local.profile||c.profile||null;
+ out.courses=[...new Set(["General",...(Array.isArray(c.courses)?c.courses:[]),...(Array.isArray(local.courses)?local.courses:[])])];
+ out.notes={...(c.notes||{}),...(local.notes||{})};
+ for(const name of ["exams","focusRecords"]){
+  const values=[...(Array.isArray(c[name])?c[name]:[]),...(Array.isArray(local[name])?local[name]:[])],seen=new Set();
+  out[name]=values.filter(item=>{const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;});
+ }
+ out.plannerSlots={...(c.plannerSlots||{})};
+ Object.entries(local.plannerSlots||{}).forEach(([day,slots])=>{const merged=[...(Array.isArray(out.plannerSlots[day])?out.plannerSlots[day]:[]),...(Array.isArray(slots)?slots:[])],seen=new Set();out.plannerSlots[day]=merged.filter(item=>{const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;});});
+ out.dailyGoals={...(c.dailyGoals||{}),...(local.dailyGoals||{})};
+ out.theme=local.theme||c.theme||"light";
+ return out;
+}
+function applyWorkspaceData(data){
+ if(!currentUserId)return;
+ workspaceApplyingCloud=true;
+ try{
+  const id=currentUserId,prefix="campuskit:";
+  if(data.profile)localStorage.setItem(prefix+"profile:"+id,JSON.stringify(data.profile));
+  localStorage.setItem(prefix+"courses:"+id,JSON.stringify(data.courses||["General"]));
+  Object.entries(data.notes||{}).forEach(([course,note])=>localStorage.setItem(prefix+"notes:"+id+":"+encodeURIComponent(course),String(note??"")));
+  ["exams","focusRecords"].forEach(name=>localStorage.setItem(prefix+name+":"+id,JSON.stringify(data[name]||[])));
+  ["plannerSlots","dailyGoals"].forEach(name=>localStorage.setItem(prefix+name+":"+id,JSON.stringify(data[name]||{})));
+  if(data.theme)localStorage.setItem("campuskitTheme",data.theme);
+ }finally{workspaceApplyingCloud=false;}
+ if(data.theme)setTheme(data.theme);
+ loadStudentProfile({user_metadata:{},email:""});
+ renderCourses();refreshNoteCourseOptions();renderExams();renderInsights();renderWeeklyPlanner();
+}
+async function syncWorkspace(){
+ if(!currentUserId||workspaceSyncBusy)return;
+ workspaceSyncBusy=true;workspaceStatus("Syncing your study data…");
+ try{
+  const userId=currentUserId,local=workspaceLocalSnapshot();
+  const {data,error}=await window.campuskitSupabase.from("student_workspace").select("workspace_data").eq("user_id",userId).maybeSingle();
+  if(error)throw error;
+  const merged=mergeWorkspaceData(data?.workspace_data||{},local);
+  if(userId!==currentUserId)return;
+  const {error:saveError}=await window.campuskitSupabase.from("student_workspace").upsert({user_id:userId,workspace_data:merged,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+  if(saveError)throw saveError;
+  applyWorkspaceData(merged);workspaceSyncReady=true;
+  workspaceStatus("Cloud sync is on. Your notes, courses, exams and study planner are backed up.");
+ }catch(error){
+  workspaceStatus("Cloud sync could not finish: "+(error.message||"Check your connection and table permissions."),true);
+ }finally{
+  workspaceSyncBusy=false;
+  if(workspaceSyncQueued){workspaceSyncQueued=false;scheduleWorkspaceSync();}
+ }
+}
+function scheduleWorkspaceSync(){
+ if(!workspaceSyncReady||workspaceApplyingCloud||!currentUserId)return;
+ clearTimeout(workspaceSyncTimer);
+ workspaceSyncTimer=setTimeout(async()=>{
+  if(workspaceSyncBusy){workspaceSyncQueued=true;return;}
+  const userId=currentUserId,local=workspaceLocalSnapshot();
+  try{
+   const {data,error}=await window.campuskitSupabase.from("student_workspace").select("workspace_data").eq("user_id",userId).maybeSingle();
+   if(error)throw error;if(userId!==currentUserId)return;
+   const merged=mergeWorkspaceData(data?.workspace_data||{},local);
+   const {error:saveError}=await window.campuskitSupabase.from("student_workspace").upsert({user_id:userId,workspace_data:merged,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+   if(saveError)throw saveError;
+   workspaceStatus("All changes synced to your student account.");
+  }catch(error){workspaceStatus("Saved on this device; cloud sync will retry when connected.",true);}
+ },1500);
+}
+const originalCampusKitSetItem=Storage.prototype.setItem;
+Storage.prototype.setItem=function(key,value){
+ originalCampusKitSetItem.call(this,key,value);
+ if(this===localStorage&&typeof key==="string"&&(key.startsWith("campuskit:")||key==="campuskitTheme"))scheduleWorkspaceSync();
+};
+$("syncWorkspaceButton")?.addEventListener("click",syncWorkspace);
+
 /* Phase 3: course workspace and portable backup */
 function profileStorageKey(){return "campuskit:profile:"+currentUserId;}
 function loadStudentProfile(user){
