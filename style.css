@@ -1012,3 +1012,30 @@ body.dark-mode .ambient-float-layer{opacity:.52}
 @media(prefers-reduced-motion:reduce){
  .ambient-float-layer{display:none}
 }
+
+
+/* Phase 12.1: ensure ambient decorations remain visible behind the app */
+body { position:relative; }
+.ambient-float-layer{
+ position:fixed!important; inset:0!important; z-index:1!important;
+ display:block!important; opacity:1!important; overflow:hidden!important;
+ pointer-events:none!important;
+}
+.site-header,.auth-shell,.container{position:relative!important;z-index:2!important}
+.ambient-bubble{
+ border-color:rgba(64,125,170,.58);
+ background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95),rgba(111,177,211,.24) 72%);
+ box-shadow:0 0 12px rgba(91,151,190,.13),inset -3px -4px 8px rgba(91,151,190,.12);
+}
+.ambient-book{opacity:.48;filter:none;text-shadow:0 2px 8px rgba(49,93,135,.16)}
+.ambient-spark{color:rgba(49,112,160,.7)}
+@media(prefers-reduced-motion:reduce){
+ .ambient-float-layer{display:block!important;opacity:.65!important}
+ .ambient-bubble,.ambient-book,.ambient-spark{animation:none!important}
+ .bubble-one{left:8%;top:14%}.bubble-two{left:29%;top:38%}
+ .bubble-three{left:53%;top:68%}.bubble-four{left:76%;top:24%}
+ .bubble-five{left:92%;top:78%}.book-one{left:18%;top:54%}
+ .book-two{left:43%;top:18%}.book-three{left:68%;top:82%}
+ .book-four{left:85%;top:48%}.book-five{left:34%;top:88%}
+ .spark-one{left:61%;top:35%}.spark-two{left:12%;top:72%}
+}
