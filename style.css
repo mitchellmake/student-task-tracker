@@ -928,3 +928,29 @@ button:active{transform:scale(.98)}
  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
  .reveal-item{opacity:1;transform:none}
 }
+
+
+/* Phase 11: stronger float-in-on-scroll motion */
+.reveal-item{
+ opacity:0;
+ transform:translate3d(0,44px,0) scale(.965);
+ filter:blur(3px);
+ transition:
+  opacity .8s ease,
+  transform .8s cubic-bezier(.16,1,.3,1),
+  filter .8s ease;
+ transition-delay:var(--reveal-delay,0ms);
+ will-change:opacity,transform;
+}
+.reveal-item.is-visible{
+ opacity:1;
+ transform:translate3d(0,0,0) scale(1);
+ filter:blur(0);
+}
+@media(max-width:640px){
+ .reveal-item{transform:translate3d(0,30px,0) scale(.98);transition-duration:.65s}
+ .reveal-item.is-visible{transform:translate3d(0,0,0) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+ .reveal-item,.reveal-item.is-visible{opacity:1;transform:none;filter:none;will-change:auto}
+}
