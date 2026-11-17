@@ -954,3 +954,61 @@ button:active{transform:scale(.98)}
 @media(prefers-reduced-motion:reduce){
  .reveal-item,.reveal-item.is-visible{opacity:1;transform:none;filter:none;will-change:auto}
 }
+
+
+/* Phase 12: calm floating study-themed background details */
+.ambient-float-layer{
+ position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+ contain:strict;opacity:.72;
+}
+.site-header,.auth-shell,.container{position:relative;z-index:1}
+.ambient-bubble,.ambient-book,.ambient-spark{
+ position:absolute;display:block;will-change:transform,opacity;
+ animation:ambient-rise 19s linear infinite;
+}
+.ambient-bubble{
+ width:22px;height:22px;border:1.5px solid rgba(91,151,190,.28);
+ border-radius:50%;
+ background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.72),rgba(139,196,218,.08) 68%);
+ box-shadow:inset -3px -4px 8px rgba(91,151,190,.08);
+}
+.ambient-bubble::after{
+ content:"";position:absolute;width:4px;height:4px;top:4px;left:5px;
+ border-radius:50%;background:rgba(255,255,255,.8);
+}
+.ambient-book{font-size:clamp(18px,2.2vw,27px);opacity:.19;filter:saturate(.72);animation-name:ambient-book-drift}
+.ambient-spark{font-size:20px;color:rgba(91,143,183,.35);animation-name:ambient-twinkle}
+.bubble-one{left:8%;top:88%;animation-delay:-3s;transform:scale(.8)}
+.bubble-two{left:29%;top:104%;width:34px;height:34px;animation-delay:-12s}
+.bubble-three{left:53%;top:95%;width:15px;height:15px;animation-delay:-7s}
+.bubble-four{left:76%;top:110%;width:29px;height:29px;animation-delay:-15s}
+.bubble-five{left:92%;top:90%;width:18px;height:18px;animation-delay:-5s}
+.book-one{left:18%;top:110%;animation-delay:-8s}
+.book-two{left:43%;top:105%;animation-delay:-16s}
+.book-three{left:68%;top:115%;animation-delay:-4s}
+.book-four{left:85%;top:108%;animation-delay:-11s}
+.book-five{left:34%;top:118%;animation-delay:-2s}
+.spark-one{left:61%;top:100%;animation-delay:-9s}
+.spark-two{left:12%;top:112%;animation-delay:-14s}
+@keyframes ambient-rise{
+ 0%{translate:0 0;opacity:0}
+ 12%{opacity:.55}
+ 82%{opacity:.42}
+ 100%{translate:18px -125vh;opacity:0}
+}
+@keyframes ambient-book-drift{
+ 0%{translate:0 0;rotate:-12deg;opacity:0}
+ 15%{opacity:.2}
+ 50%{translate:22px -58vh;rotate:7deg}
+ 85%{opacity:.18}
+ 100%{translate:-10px -125vh;rotate:-8deg;opacity:0}
+}
+@keyframes ambient-twinkle{
+ 0%,100%{translate:0 0;opacity:0;scale:.7}
+ 35%,70%{opacity:.55;scale:1}
+ 50%{translate:8px -55vh}
+}
+body.dark-mode .ambient-float-layer{opacity:.52}
+@media(prefers-reduced-motion:reduce){
+ .ambient-float-layer{display:none}
+}
