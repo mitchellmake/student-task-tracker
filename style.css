@@ -892,3 +892,39 @@ body.dark-mode #logoutButton { background:#203244; color:var(--text); border-col
 .planner-slot-times{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .planner-slot-actions{display:flex;gap:5px}
 .planner-slot-actions button{flex:1;padding:5px;font-size:10px}
+
+
+/* Phase 10: refined navigation and scroll-reveal motion */
+.app-quick-nav{
+ position:sticky;top:0;z-index:20;display:flex;gap:8px;align-items:center;
+ margin:0 0 22px;padding:10px 12px;overflow-x:auto;white-space:nowrap;
+ background:rgba(255,255,255,.92);border:1px solid var(--border);
+ border-radius:14px;box-shadow:0 5px 20px rgba(37,67,96,.06);
+ backdrop-filter:blur(12px);scrollbar-width:thin;
+}
+.app-quick-nav a{
+ flex:0 0 auto;padding:8px 12px;border-radius:9px;text-decoration:none;
+ color:var(--muted);font-size:13px;font-weight:700;transition:background .2s,color .2s,transform .2s;
+}
+.app-quick-nav a:hover,.app-quick-nav a.is-active{
+ color:var(--blue-dark);background:var(--blue-light);
+}
+.app-quick-nav a:active{transform:scale(.97)}
+.reveal-item{opacity:0;transform:translate3d(0,28px,0);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1);transition-delay:var(--reveal-delay,0ms)}
+.reveal-item.is-visible{opacity:1;transform:translate3d(0,0,0)}
+.stat-card{transition:transform .25s ease,box-shadow .25s ease}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(37,67,96,.11)}
+.panel{transition:box-shadow .25s ease,border-color .25s ease}
+.panel:hover{border-color:#d4e2ef;box-shadow:0 12px 32px rgba(37,67,96,.07)}
+button,.primary-button,.secondary-button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease}
+button:active{transform:scale(.98)}
+@media(max-width:640px){
+ .app-quick-nav{top:0;margin:0 -2px 16px;padding:8px;border-radius:11px;gap:4px}
+ .app-quick-nav a{padding:8px 10px;font-size:12px}
+ .reveal-item{transform:translate3d(0,18px,0);transition-duration:.5s}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+ .reveal-item{opacity:1;transform:none}
+}
