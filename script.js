@@ -440,7 +440,7 @@ renderWeeklyPlanner();
  }
  revealTargets.forEach((el,index)=>{
   el.classList.add("reveal-item");
-  if(el.classList.contains("stat-card"))el.style.setProperty("--reveal-delay",(index%3)*75+"ms");
+  el.style.setProperty("--reveal-delay",(index%4)*65+"ms");
  });
  const revealObserver=new IntersectionObserver(entries=>{
   entries.forEach(entry=>{
