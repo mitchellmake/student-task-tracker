@@ -1,6 +1,6 @@
-const CACHE_NAME = "campuskit-shell-v8";
+const CACHE_NAME = "campuskit-shell-v9";
 const APP_SHELL = [
-  "./", "./index.html", "./style.css", "./script.js?v=phase10-scroll-reveal-1", "./auth.js",
+  "./", "./index.html", "./style.css", "./script.js?v=phase11-float-in-1", "./auth.js",
   "./supabase-config.js", "./manifest.webmanifest", "./campuskit-icon.svg"
 ];
 self.addEventListener("install", event => {
