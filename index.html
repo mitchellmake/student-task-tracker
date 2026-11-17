@@ -85,8 +85,15 @@
 
 <main class="container" id="appContent" hidden>
 
+    <nav class="app-quick-nav" aria-label="CampusKit quick navigation">
+        <a href="#overview">Overview</a>
+        <a href="#assignments">Assignments</a>
+        <a href="#weeklyPlanner">Planner</a>
+        <a href="#notes">Notes</a>
+        <a href="#studentProfile">Profile</a>
+    </nav>
 
-    <section class="welcome">
+    <section class="welcome" id="overview">
         <div>
             <span class="eyebrow">WELCOME TO YOUR CAMPUS</span>
             <h1 id="welcomeGreeting">Hello, Student</h1>
@@ -277,7 +284,7 @@
     </section>
 
     <section class="phase3-tools-grid">
-      <section class="panel profile-panel">
+      <section class="panel profile-panel" id="studentProfile">
         <div class="section-heading"><div><span class="eyebrow">YOUR DETAILS</span><h2>Student profile</h2></div></div>
         <form id="profileForm" class="profile-form">
           <label for="profileName">Full name</label><input id="profileName" type="text" maxlength="100" placeholder="Your name" required>
@@ -313,6 +320,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth.js"></script>
-<script src="script.js?v=phase9-cloud-sync-1"></script>
+<script src="script.js?v=phase10-scroll-reveal-1"></script>
 </body>
 </html>
