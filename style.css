@@ -1039,3 +1039,59 @@ body { position:relative; }
  .book-four{left:85%;top:48%}.book-five{left:34%;top:88%}
  .spark-one{left:61%;top:35%}.spark-two{left:12%;top:72%}
 }
+
+
+
+/* Phase 12.2: larger, clearly visible floating study decorations */
+.ambient-float-layer{
+ opacity:1!important;
+}
+.ambient-bubble{
+ width:48px;
+ height:48px;
+ border-width:2px;
+ border-color:rgba(55,125,178,.78);
+ background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.98),rgba(105,177,218,.42) 72%);
+ box-shadow:0 0 22px rgba(75,145,195,.24),inset -5px -6px 12px rgba(64,125,170,.2);
+}
+.bubble-two{width:68px;height:68px}
+.bubble-three{width:36px;height:36px}
+.bubble-four{width:58px;height:58px}
+.bubble-five{width:44px;height:44px}
+.ambient-book{
+ font-size:clamp(38px,4.5vw,56px);
+ opacity:.72!important;
+ filter:drop-shadow(0 5px 8px rgba(42,83,120,.2));
+}
+.ambient-spark{
+ font-size:34px;
+ color:rgba(39,105,157,.88);
+ text-shadow:0 0 14px rgba(80,150,200,.3);
+}
+@keyframes ambient-rise{
+ 0%{translate:0 0;opacity:0}
+ 10%{opacity:.9}
+ 82%{opacity:.78}
+ 100%{translate:24px -125vh;opacity:0}
+}
+@keyframes ambient-book-drift{
+ 0%{translate:0 0;rotate:-12deg;opacity:0}
+ 12%{opacity:.72}
+ 50%{translate:28px -58vh;rotate:8deg}
+ 86%{opacity:.68}
+ 100%{translate:-12px -125vh;rotate:-8deg;opacity:0}
+}
+@keyframes ambient-twinkle{
+ 0%,100%{translate:0 0;opacity:.12;scale:.75}
+ 35%,70%{opacity:.95;scale:1.18}
+ 50%{translate:10px -55vh}
+}
+@media(max-width:640px){
+ .ambient-bubble{width:38px;height:38px}
+ .bubble-two{width:54px;height:54px}
+ .bubble-three{width:30px;height:30px}
+ .bubble-four{width:46px;height:46px}
+ .bubble-five{width:36px;height:36px}
+ .ambient-book{font-size:38px}
+ .ambient-spark{font-size:28px}
+}
