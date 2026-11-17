@@ -1095,3 +1095,92 @@ body { position:relative; }
  .ambient-book{font-size:38px}
  .ambient-spark{font-size:28px}
 }
+
+
+/* Phase 13: ambient aurora, glowing orbs and gentle study-icon motion */
+.ambient-float-layer::before,
+.ambient-float-layer::after{
+ content:"";
+ position:absolute;
+ width:min(48vw,620px);
+ height:min(48vw,620px);
+ border-radius:50%;
+ filter:blur(55px);
+ opacity:.23;
+ pointer-events:none;
+}
+.ambient-float-layer::before{
+ left:-12%;top:8%;
+ background:radial-gradient(circle,rgba(100,174,224,.75),rgba(100,174,224,0) 68%);
+ animation:aurora-drift-a 18s ease-in-out infinite alternate;
+}
+.ambient-float-layer::after{
+ right:-14%;bottom:0;
+ background:radial-gradient(circle,rgba(171,145,225,.62),rgba(171,145,225,0) 68%);
+ animation:aurora-drift-b 22s ease-in-out infinite alternate;
+}
+.ambient-bubble,.ambient-book,.ambient-spark{
+ animation:none!important;
+ opacity:.72!important;
+}
+.bubble-one{left:8%;top:17%}
+.bubble-two{left:29%;top:67%}
+.bubble-three{left:53%;top:32%}
+.bubble-four{left:76%;top:76%}
+.bubble-five{left:92%;top:20%}
+.book-one{left:18%;top:48%}
+.book-two{left:43%;top:13%}
+.book-three{left:68%;top:53%}
+.book-four{left:85%;top:39%}
+.book-five{left:34%;top:84%}
+.spark-one{left:61%;top:18%}
+.spark-two{left:12%;top:78%}
+.ambient-bubble{animation:bubble-glow 6s ease-in-out infinite!important}
+.bubble-two{animation-delay:-2s!important}
+.bubble-three{animation-delay:-4s!important}
+.bubble-four{animation-delay:-1s!important}
+.bubble-five{animation-delay:-3s!important}
+.ambient-book{animation:book-sway 7s ease-in-out infinite!important;transform-origin:center}
+.book-two{animation-delay:-2s!important}
+.book-three{animation-delay:-4s!important}
+.book-four{animation-delay:-1s!important}
+.book-five{animation-delay:-3s!important}
+.ambient-spark{animation:sparkle-pulse 3.5s ease-in-out infinite!important}
+.spark-two{animation-delay:-1.7s!important}
+@keyframes aurora-drift-a{
+ 0%{transform:translate(0,0) scale(.85)}
+ 50%{transform:translate(22vw,12vh) scale(1.18)}
+ 100%{transform:translate(8vw,25vh) scale(1)}
+}
+@keyframes aurora-drift-b{
+ 0%{transform:translate(0,0) scale(1)}
+ 50%{transform:translate(-20vw,-16vh) scale(1.2)}
+ 100%{transform:translate(-6vw,-28vh) scale(.9)}
+}
+@keyframes bubble-glow{
+ 0%,100%{transform:scale(.88);filter:brightness(.95)}
+ 50%{transform:scale(1.12);filter:brightness(1.18)}
+}
+@keyframes book-sway{
+ 0%,100%{transform:rotate(-9deg) translateY(0)}
+ 50%{transform:rotate(9deg) translateY(-13px)}
+}
+@keyframes sparkle-pulse{
+ 0%,100%{transform:scale(.7) rotate(0);opacity:.25}
+ 50%{transform:scale(1.35) rotate(24deg);opacity:.95}
+}
+body.dark-mode .ambient-float-layer::before,
+body.dark-mode .ambient-float-layer::after{opacity:.3}
+@media(max-width:640px){
+ .ambient-float-layer::before,.ambient-float-layer::after{width:75vw;height:75vw;filter:blur(38px)}
+ .ambient-book{font-size:32px}
+ .ambient-bubble{width:30px;height:30px}
+ .bubble-two{width:42px;height:42px}
+ .bubble-three{width:25px;height:25px}
+ .bubble-four{width:36px;height:36px}
+ .bubble-five{width:28px;height:28px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ambient-float-layer::before,.ambient-float-layer::after,
+ .ambient-bubble,.ambient-book,.ambient-spark{animation:none!important}
+}
